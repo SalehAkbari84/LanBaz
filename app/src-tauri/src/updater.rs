@@ -21,6 +21,10 @@ use tauri_plugin_updater::{Update, UpdaterExt};
 #[derive(Default)]
 pub struct Pending(Mutex<Option<Update>>);
 
+/// A downloaded, verified installer waiting for `update_apply`.
+#[derive(Default)]
+pub struct Downloaded(Mutex<Option<(Update, Vec<u8>)>>);
+
 #[derive(Serialize)]
 pub struct UpdateStatus {
     configured: bool,
@@ -121,8 +125,11 @@ pub async fn update_check(app: AppHandle) -> Result<Option<UpdateInfo>, String> 
     Ok(info)
 }
 
+/// Downloads and verifies the update found by the last check, reporting
+/// `update-progress`, and keeps it until `update_apply`. LanBaz keeps running
+/// (and its rooms keep working) while this happens.
 #[tauri::command]
-pub async fn update_install(app: AppHandle) -> Result<(), String> {
+pub async fn update_download(app: AppHandle) -> Result<(), String> {
     let update = app
         .state::<Pending>()
         .0
@@ -140,16 +147,37 @@ pub async fn update_install(app: AppHandle) -> Result<(), String> {
         )
         .await
         .map_err(|e| e.to_string())?;
+    *app.state::<Downloaded>().0.lock().unwrap_or_else(|e| e.into_inner()) = Some((update, bytes));
+    Ok(())
+}
 
-    // Verified and on disk: now stop the daemon so its files can be replaced.
+/// Closes the rooms (the daemon says goodbye to every player and removes its
+/// adapter, routes and firewall rule), then starts the installer, which
+/// replaces LanBaz and starts the new version. Kept networks come back by
+/// themselves after the restart.
+#[tauri::command]
+pub async fn update_apply(app: AppHandle) -> Result<(), String> {
+    let (update, bytes) = app
+        .state::<Downloaded>()
+        .0
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .take()
+        .ok_or("the update has not been downloaded")?;
     if let Some(supervisor) = app.try_state::<Arc<super::supervisor::Supervisor>>() {
         supervisor.suppress();
     }
     let _ = tauri::async_runtime::spawn_blocking(super::daemon::stop_blocking).await;
     super::kill_sidecars(&app);
-
     // On Windows this starts the installer and exits LanBaz.
     update.install(bytes).map_err(|e| e.to_string())
+}
+
+/// Download and apply in one step.
+#[tauri::command]
+pub async fn update_install(app: AppHandle) -> Result<(), String> {
+    update_download(app.clone()).await?;
+    update_apply(app).await
 }
 
 #[cfg(test)]

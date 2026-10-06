@@ -58,6 +58,20 @@ func connectedTo(t *testing.T, c *protocol.Client, peer string) bool {
 	return false
 }
 
+// addressing returns a host's room subnet and the guest's address in it.
+func addressing(t *testing.T, c *protocol.Client, guest string) (subnet, guestAddr string) {
+	var rooms []protocol.RoomSummary
+	if call(t, c, protocol.MethodRoomList, nil, &rooms) != nil || len(rooms) != 1 {
+		return "", ""
+	}
+	for _, p := range rooms[0].Peers {
+		if string(p.PeerID) == guest {
+			guestAddr = p.VirtualAddress
+		}
+	}
+	return rooms[0].Subnet, guestAddr
+}
+
 // A kept network survives the host restarting: the room is reopened by
 // itself and the guest is back in it without anybody clicking anything.
 func TestKeptNetworkComesBackAfterHostRestart(t *testing.T) {
@@ -115,6 +129,14 @@ func TestKeptNetworkComesBackAfterHostRestart(t *testing.T) {
 		t.Fatalf("guest kept %+v", kept)
 	}
 
+	var subnetBefore, addrBefore string
+	waitFor(t, "the guest has an address", 30*time.Second, func() bool {
+		subnetBefore, addrBefore = addressing(t, hc, string(guest.id))
+		return subnetBefore != "" && addrBefore != ""
+	})
+	// Let the keeper record the subnet and the lease.
+	time.Sleep(2 * keepEvery)
+
 	// The host PC restarts: same state directory, new process, new room id.
 	host.Shutdown(time.Second)
 	<-host.Done()
@@ -139,6 +161,15 @@ func TestKeptNetworkComesBackAfterHostRestart(t *testing.T) {
 		return call(t, hc2, protocol.MethodNetworkKept, nil, &k) == nil && k.Hosting != nil && len(k.Rooms) == 1
 	})
 	waitFor(t, "the guest is back without a click", 3*time.Minute, func() bool { return connectedTo(t, gc, string(host2.id)) })
+	// Everybody keeps their IP: the same subnet, the same guest address.
+	var subnetAfter, addrAfter string
+	waitFor(t, "the guest gets its address back", 30*time.Second, func() bool {
+		subnetAfter, addrAfter = addressing(t, hc2, string(guest.id))
+		return addrAfter != ""
+	})
+	if subnetAfter != subnetBefore || addrAfter != addrBefore {
+		t.Fatalf("addresses changed across the restart: %s %s -> %s %s", subnetBefore, addrBefore, subnetAfter, addrAfter)
+	}
 	select {
 	case extra := <-prompts:
 		t.Fatalf("the restarted host prompted for a kept member: %+v", extra)

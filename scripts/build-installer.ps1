@@ -22,7 +22,7 @@
 #>
 [CmdletBinding()]
 param(
-  [string]$Version = "0.5.2",
+  [string]$Version = "0.6.2",
   [switch]$SkipUI,
   [string]$UpdateRepo = $env:LANBAZ_UPDATE_REPO,
   [string]$SigningKey = (Join-Path $env:USERPROFILE '.lanbaz\updater.key'),
@@ -51,16 +51,35 @@ try {
   Write-Host "== bundling the installer"
   $env:LANBAZ_UPDATE_REPO = $UpdateRepo
   $tauriArgs = @('tauri', 'build', '--bundles', 'nsis')
+  $bundleConf = @{}
   $signed = Test-Path $SigningKey
   if ($signed) {
     # The key file stays outside the repo; only its path is handed to Tauri.
     $env:TAURI_SIGNING_PRIVATE_KEY = $SigningKey
     if (-not $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD) { $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = '' }
-    $override = Join-Path $env:TEMP 'lanbaz-updater.conf.json'
-    '{"bundle":{"createUpdaterArtifacts":true}}' | Set-Content -Encoding ascii $override
-    $tauriArgs += @('--config', $override)
+    $bundleConf.createUpdaterArtifacts = $true
   } else {
     Write-Host "   (no signing key at $SigningKey - the installer is not signed and cannot be offered as an automatic update)"
+  }
+  # Authenticode (Windows "publisher" signature, separate from the update
+  # signature above): only when a certificate is configured. See docs\signing.md.
+  #   LANBAZ_SIGN_THUMBPRINT  a code-signing certificate in the Windows store
+  #   LANBAZ_SIGN_COMMAND     a signing tool command line with %1 for the file
+  #                           (Azure Trusted Signing, SignPath, signtool ...)
+  if ($env:LANBAZ_SIGN_COMMAND) {
+    $bundleConf.windows = @{ signCommand = $env:LANBAZ_SIGN_COMMAND }
+    Write-Host "   Authenticode: signing with LANBAZ_SIGN_COMMAND"
+  } elseif ($env:LANBAZ_SIGN_THUMBPRINT) {
+    $ts = if ($env:LANBAZ_SIGN_TIMESTAMP) { $env:LANBAZ_SIGN_TIMESTAMP } else { 'http://timestamp.digicert.com' }
+    $bundleConf.windows = @{ certificateThumbprint = $env:LANBAZ_SIGN_THUMBPRINT; digestAlgorithm = 'sha256'; timestampUrl = $ts }
+    Write-Host "   Authenticode: signing with certificate $($env:LANBAZ_SIGN_THUMBPRINT)"
+  } else {
+    Write-Host "   (no Authenticode certificate - Windows SmartScreen will say 'Unknown publisher'; see docs\signing.md)"
+  }
+  if ($bundleConf.Count -gt 0) {
+    $override = Join-Path $env:TEMP 'lanbaz-build.conf.json'
+    @{ bundle = $bundleConf } | ConvertTo-Json -Depth 5 | Set-Content -Encoding ascii $override
+    $tauriArgs += @('--config', $override)
   }
   # The tauri.conf.json beforeBuildCommand runs the vite build.
   npx @tauriArgs

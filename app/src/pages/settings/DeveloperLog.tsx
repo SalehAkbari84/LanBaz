@@ -1,8 +1,11 @@
-import { Copy, Pause, Play, Terminal, Trash2 } from 'lucide-react'
+import { Copy, FileArchive, Pause, Play, Terminal, Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { Card, SectionTitle, writeClipboard } from '../../components/ui'
 import { useT } from '../../i18n'
+import { invoke } from '@tauri-apps/api/core'
+import { isTauri } from '../../services/tauri'
+import { toast } from '../../stores/toasts'
 import { daemonClient, useDaemonStore } from '../../stores/daemon'
 
 interface LogEntry {
@@ -32,6 +35,21 @@ function line(e: LogEntry): string {
 
 /** Settings → Developer: the engine's live log, colored and copyable. */
 export function DeveloperLog() {
+  const [bundling, setBundling] = useState(false)
+  const bundle = async () => {
+    setBundling(true)
+    try {
+      const r = await daemonClient()?.request<{ path: string }>('diag.bundle', {}, 90_000)
+      if (r?.path) {
+        toast({ tone: 'ok', title: t('diag.made'), body: r.path }, 8000)
+        if (isTauri()) await invoke('reveal_received', { path: r.path }).catch(() => undefined)
+      }
+    } catch (e) {
+      toast({ tone: 'error', title: t('diag.failed'), body: e instanceof Error ? e.message : String(e) }, 9000)
+    } finally {
+      setBundling(false)
+    }
+  }
   const t = useT()
   const connected = useDaemonStore((s) => s.connection === 'connected')
   const [entries, setEntries] = useState<LogEntry[]>([])
@@ -105,6 +123,9 @@ export function DeveloperLog() {
         </button>
         <button type="button" className="btn btn-sm" onClick={() => setEntries([])}>
           <Trash2 size={14} /> {t('dev.clear')}
+        </button>
+        <button type="button" className="btn btn-sm" onClick={() => void bundle()} disabled={bundling}>
+          <FileArchive size={14} /> {bundling ? t('diag.making') : t('diag.make')}
         </button>
         <button type="button" className="btn btn-primary btn-sm" onClick={() => void copy()} disabled={shown.length === 0}>
           <Copy size={14} /> {copied ? t('common.copied') : t('dev.copy')}

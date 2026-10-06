@@ -73,6 +73,8 @@ const (
 	MethodFileRespond = "file.respond"
 	MethodFileCancel  = "file.cancel"
 	MethodFileList    = "file.list"
+	// MethodDiagBundle writes a diagnostics zip and returns {"path": ...}.
+	MethodDiagBundle = "diag.bundle"
 	// EventFileUpdate carries a FileTransfer whenever one changes.
 	EventFileUpdate = "file.update"
 )
@@ -110,4 +112,52 @@ type FileTransfer struct {
 	Error string `json:"error,omitempty"`
 	// Path is the source (out) or, once done, where the file was saved (in).
 	Path string `json:"path,omitempty"`
+}
+
+// Game firewall methods and event.
+const (
+	MethodGameFirewall    = "game.firewall"
+	MethodGameFirewallFix = "game.firewall_fix"
+	EventGameFirewall     = "game.firewall"
+)
+
+// FirewallRule is one Windows Firewall rule.
+type FirewallRule struct {
+	Name        string `json:"name"`
+	DisplayName string `json:"display_name,omitempty"`
+}
+
+// GameFirewall says whether Windows Firewall blocks the running game.
+type GameFirewall struct {
+	GameID   string         `json:"game_id,omitempty"`
+	GameName string         `json:"game_name,omitempty"`
+	Path     string         `json:"path,omitempty"`
+	Blocked  []FirewallRule `json:"blocked,omitempty"`
+}
+
+// MethodGameApply sets up everything LanBaz can for one game.
+const MethodGameApply = "game.apply"
+
+// GameApplyRequest names the game and, when LanBaz could not find it, the
+// path of its program.
+type GameApplyRequest struct {
+	GameID string `json:"game_id"`
+	Path   string `json:"path,omitempty"`
+}
+
+// GameApplyStep is one thing Apply did: "firewall", "network" or "gfwl".
+type GameApplyStep struct {
+	Step   string `json:"step"`
+	OK     bool   `json:"ok"`
+	Detail string `json:"detail,omitempty"`
+}
+
+// GameApplyResult reports every step. NeedsPath asks the UI to let the user
+// pick the game's program (one of Executables) and apply again.
+type GameApplyResult struct {
+	GameID      string          `json:"game_id"`
+	GameName    string          `json:"game_name"`
+	Steps       []GameApplyStep `json:"steps"`
+	NeedsPath   bool            `json:"needs_path,omitempty"`
+	Executables []string        `json:"executables,omitempty"`
 }

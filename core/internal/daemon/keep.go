@@ -3,6 +3,7 @@ package daemon
 import (
 	"context"
 	"encoding/json"
+	"maps"
 	"os"
 	"path/filepath"
 	"slices"
@@ -33,6 +34,9 @@ type keptHost struct {
 	Name    string   `json:"name"`
 	Mode    string   `json:"mode,omitempty"`
 	Members []string `json:"members,omitempty"` // friend pubs let back in without a prompt
+	// Subnet and Leases keep everybody's 10.200 address across restarts.
+	Subnet string            `json:"subnet,omitempty"`
+	Leases map[string]string `json:"leases,omitempty"` // player identity -> address
 }
 
 type keptState struct {
@@ -48,6 +52,9 @@ type keeper struct {
 	hostRoom string               // the open room serving st.Host
 	askedAt  map[string]time.Time // host pub -> last automatic join request
 	failed   string               // last reopen error, logged once
+	// reopening is set while the kept room is being created again: a member's
+	// request can arrive (they see the new room) before hostRoom is known.
+	reopening bool
 }
 
 func newKeeper(stateDir string) *keeper {
@@ -81,7 +88,7 @@ func (k *keeper) save() error {
 func (k *keeper) isMember(roomID, pub string) bool {
 	k.mu.Lock()
 	defer k.mu.Unlock()
-	return k.st.Host != nil && roomID == k.hostRoom && slices.Contains(k.st.Host.Members, pub)
+	return k.st.Host != nil && (roomID == k.hostRoom || k.reopening) && slices.Contains(k.st.Host.Members, pub)
 }
 
 func (k *keeper) addMember(roomID, pub string) {
@@ -119,7 +126,7 @@ func (f *friends) setKeep(roomID string, keep bool) (protocol.KeptNetworks, erro
 	switch {
 	case r.IsHost() && keep:
 		s := r.Summary()
-		k.st.Host = &keptHost{Name: s.Name, Mode: r.Mode(), Members: members}
+		k.st.Host = &keptHost{Name: s.Name, Mode: r.Mode(), Members: members, Subnet: s.Subnet}
 		k.hostRoom = roomID
 	case r.IsHost():
 		if k.hostRoom == roomID {
@@ -225,15 +232,29 @@ func (f *friends) keepTick(ctx context.Context) {
 	}
 	k := f.keep
 	k.mu.Lock()
-	host := k.st.Host
+	// A copy: the loop below reads it without the lock while
+	// rememberAddresses may update the original.
+	var host *keptHost
+	if k.st.Host != nil {
+		h := *k.st.Host
+		h.Leases = maps.Clone(k.st.Host.Leases)
+		host = &h
+	}
 	hostRoom := k.hostRoom
 	join := slices.Clone(k.st.Join)
 	k.mu.Unlock()
 
 	if host != nil {
+		if r, err := rooms.Get(hostRoom); err == nil {
+			f.rememberAddresses(r.Summary())
+		}
 		if _, err := rooms.Get(hostRoom); hostRoom == "" || err != nil {
-			resp, err := rooms.Create(ctx, protocol.RoomCreateRequest{Name: host.Name, Mode: host.Mode})
 			k.mu.Lock()
+			k.reopening = true
+			k.mu.Unlock()
+			resp, err := rooms.Create(ctx, protocol.RoomCreateRequest{Name: host.Name, Mode: host.Mode, Subnet: host.Subnet, Leases: host.Leases})
+			k.mu.Lock()
+			k.reopening = false
 			if err != nil {
 				if k.failed != err.Error() {
 					k.failed = err.Error()
@@ -294,5 +315,35 @@ func (f *friends) keepTick(ctx context.Context) {
 		}
 		f.d.log.Info("rejoining a kept network", "friend", fr.Name, "room", fr.Presence.Room)
 		_ = f.requestJoin(ctx, fr, fr.Presence.Room)
+	}
+}
+
+// rememberAddresses records the kept room's subnet and who holds which address,
+// so a reopened network hands everybody the same IP again.
+func (f *friends) rememberAddresses(s protocol.RoomSummary) {
+	k := f.keep
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	if k.st.Host == nil || s.RoomID != k.hostRoom {
+		return
+	}
+	changed := false
+	if s.Subnet != "" && k.st.Host.Subnet != s.Subnet {
+		k.st.Host.Subnet, changed = s.Subnet, true
+	}
+	for _, p := range s.Peers {
+		if p.IsSelf || p.PeerID == "" || p.VirtualAddress == "" {
+			continue
+		}
+		if k.st.Host.Leases == nil {
+			k.st.Host.Leases = map[string]string{}
+		}
+		if k.st.Host.Leases[string(p.PeerID)] != p.VirtualAddress {
+			k.st.Host.Leases[string(p.PeerID)] = p.VirtualAddress
+			changed = true
+		}
+	}
+	if changed {
+		_ = k.save()
 	}
 }

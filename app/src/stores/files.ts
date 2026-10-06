@@ -29,6 +29,8 @@ interface FilesState {
   respond: (id: string, accept: boolean) => Promise<void>
   cancel: (id: string) => Promise<void>
   reveal: (path: string) => Promise<void>
+  /** Opens the Windows file picker and sends the chosen files to a player. */
+  pickAndSend: (roomId: string, peerId: string) => Promise<void>
   dismiss: (id: string) => void
 }
 
@@ -53,10 +55,11 @@ export const useFiles = create<FilesState>((set, get) => ({
     const before = get().transfers[t.id]
     set((s) => ({ transfers: { ...s.transfers, [t.id]: t } }))
     if (before?.state === t.state) return
-    if (t.direction === 'in' && t.state === 'incoming') toast({ tone: 'info', title: tr('files.incoming', { name: t.peer_name ?? '?' }), body: t.name, who: t.peer_name }, 12000)
-    if (t.state === 'done') toast({ tone: 'ok', title: t.direction === 'in' ? tr('files.received') : tr('files.sent'), body: t.name })
-    if (t.state === 'failed') toast({ tone: 'error', title: tr('files.failed'), body: t.error ?? t.name }, 8000)
-    if (t.direction === 'out' && t.state === 'declined') toast({ tone: 'warn', title: tr('files.declined', { name: t.peer_name ?? '?' }), body: t.name })
+    if (['done', 'declined', 'canceled', 'expired', 'failed'].includes(t.state)) setTimeout(() => get().dismiss(t.id), 2 * 60_000)
+    if (t.direction === 'in' && t.state === 'incoming') toast({ tone: 'info', title: tr('files.incoming', { name: t.peer_name ?? '?' }), body: t.name, who: t.peer_name, key: `file:${t.id}` }, 12000)
+    if (t.state === 'done') toast({ tone: 'ok', title: t.direction === 'in' ? tr('files.received') : tr('files.sent'), body: t.name, key: `file:${t.id}` })
+    if (t.state === 'failed') toast({ tone: 'error', title: tr('files.failed'), body: t.error ?? t.name, key: `file:${t.id}` }, 8000)
+    if (t.direction === 'out' && t.state === 'declined') toast({ tone: 'warn', title: tr('files.declined', { name: t.peer_name ?? '?' }), body: t.name, key: `file:${t.id}` })
   },
   offer: async (roomId, peerId, path) => {
     try {
@@ -83,6 +86,14 @@ export const useFiles = create<FilesState>((set, get) => ({
   reveal: async (path) => {
     try {
       await invoke('reveal_received', { path })
+    } catch (e) {
+      fail(e)
+    }
+  },
+  pickAndSend: async (roomId, peerId) => {
+    try {
+      const paths = await invoke<string[]>('pick_files', { title: tr('files.pickTitle') })
+      for (const path of paths) await get().offer(roomId, peerId, path)
     } catch (e) {
       fail(e)
     }

@@ -57,10 +57,20 @@ func (r *Room) subnetString() string {
 // announced identity, because the id is minted here and travels in the code. An
 // identity-based reservation could not be made at all: at issue time the host
 // has never seen the guest's key.
-func (r *Room) allocateGuestAddr(peerID string) (netip.Addr, error) {
+func (r *Room) allocateGuestAddr(peerID, identity string) (netip.Addr, error) {
 	r.netMu.RLock()
 	alloc := r.allocator
+	subnet := r.subnet
+	prefer := r.leaseHints[identity]
 	r.netMu.RUnlock()
+	if alloc != nil && identity != "" {
+		// A friend invited by name: their remembered address, or the one their
+		// identity hashes to, so they keep the same IP every time.
+		if !prefer.IsValid() || !subnet.Contains(prefer) {
+			prefer = ipam.PreferredFor(subnet, identity)
+		}
+		return alloc.AllocatePreferred(r.id, peerID, prefer)
+	}
 	if alloc == nil {
 		// No allocator means this build has no virtual LAN. Handing back the
 		// host's own address would be wrong, so the code simply carries no
@@ -160,6 +170,19 @@ func (r *Room) ReserveAddressing() error {
 	r.netMu.RUnlock()
 	if alloc == nil || !ok {
 		return nil
+	}
+	if want := r.wantSubnet; r.isHost && want.IsValid() && want != subnet {
+		if _, err := alloc.Adopt(r.id, want); err == nil {
+			r.log.Info("kept network reopened on its own subnet, so everybody keeps their IP", "subnet", want.String())
+			return r.retargetAddressing(want, false)
+		} else {
+			r.log.Warn("the kept network's subnet is taken on this PC; using another one, so IPs change this time",
+				"wanted", want.String(), "error", err)
+		}
+	} else if want.IsValid() && want == subnet {
+		if _, err := alloc.Adopt(r.id, want); err == nil {
+			return nil
+		}
 	}
 	claimed, probed, err := alloc.Reserve(r.id)
 	if err != nil {

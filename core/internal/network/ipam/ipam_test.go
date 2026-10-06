@@ -437,3 +437,43 @@ func TestHostAddressIsTheFirstHostAddress(t *testing.T) {
 		t.Errorf("the first guest offset %d does not follow the host at %d", FirstGuestOffset, HostOffset)
 	}
 }
+
+// A friend keeps the same address in a network across sessions.
+func TestPreferredAddressIsStable(t *testing.T) {
+	subnet := netip.MustParsePrefix("10.200.17.0/24")
+	a1, a2 := PreferredFor(subnet, "friend-key"), PreferredFor(subnet, "friend-key")
+	if a1 != a2 || !subnet.Contains(a1) || a1 == HostAddress(subnet) {
+		t.Fatalf("preferred %v / %v", a1, a2)
+	}
+	if PreferredFor(subnet, "").IsValid() {
+		t.Fatal("no identity must give no preference")
+	}
+
+	for session := 0; session < 2; session++ {
+		a := New(Pool)
+		if _, err := a.Adopt("room", subnet); err != nil {
+			t.Fatal(err)
+		}
+		// A different link id each session, the same identity.
+		got, err := a.AllocatePreferred("room", "link-"+string(rune('a'+session)), a1)
+		if err != nil || got != a1 {
+			t.Fatalf("session %d got %v, want %v (%v)", session, got, a1, err)
+		}
+	}
+
+	// Taken by somebody else: falls back to another free address.
+	a := New(Pool)
+	_, _ = a.Adopt("room", subnet)
+	_, _ = a.AllocatePreferred("room", "other", a1)
+	got, err := a.AllocatePreferred("room", "me", a1)
+	if err != nil || got == a1 || !subnet.Contains(got) {
+		t.Fatalf("fallback got %v (%v)", got, err)
+	}
+	// Outside the subnet or the host's own address is never handed out.
+	for _, bad := range []netip.Addr{netip.MustParseAddr("10.200.99.5"), HostAddress(subnet)} {
+		got, _ := a.AllocatePreferred("room", "x"+bad.String(), bad)
+		if got == bad {
+			t.Fatalf("handed out %v", bad)
+		}
+	}
+}

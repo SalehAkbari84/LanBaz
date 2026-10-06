@@ -101,24 +101,25 @@ export function wireFriendEvents(c: DaemonClient): void {
   })
   c.on<JoinStatus>(FRIEND_EVENT.status, (s) => {
     const name = s.friend.name
+    const key = `join:${s.friend.pub}`
     switch (s.status) {
       case 'sent':
-        toast({ tone: 'info', title: t('join.sent', { name }), who: name })
+        toast({ tone: 'info', title: t('join.sent', { name }), who: name, key })
         break
       case 'connected':
-        toast({ tone: 'ok', title: t('join.connected', { name }), who: name })
+        toast({ tone: 'ok', title: t('join.connected', { name }), who: name, key })
         break
       case 'joining':
-        toast({ tone: 'info', title: t('join.joining', { name }), who: name })
+        toast({ tone: 'info', title: t('join.joining', { name }), who: name, key })
         break
       case 'reconnecting':
-        toast({ tone: 'warn', title: t('join.reconnecting', { name }), who: name })
+        toast({ tone: 'warn', title: t('join.reconnecting', { name }), who: name, key })
         break
       case 'rejected':
-        toast({ tone: 'warn', title: t('join.rejected', { name }), body: s.message, who: name }, 7000)
+        toast({ tone: 'warn', title: t('join.rejected', { name }), body: s.message, who: name, key }, 7000)
         break
       case 'failed':
-        toast({ tone: 'error', title: t('join.failed', { name }), body: s.message, who: name }, 9000)
+        toast({ tone: 'error', title: t('join.failed', { name }), body: s.message, who: name, key }, 9000)
         break
     }
   })

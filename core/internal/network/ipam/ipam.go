@@ -226,6 +226,53 @@ func (a *Allocator) Adopt(roomID string, subnet netip.Prefix) (bool, error) {
 	return subnet != a.prefixAt(a.subnetIndex(roomID)), nil
 }
 
+// PreferredFor is the address a player gets in a subnet when it is free: a
+// hash of their permanent identity, so the same friend has the same 10.200 IP
+// every time they join that network, like a fixed Hamachi/Radmin address.
+func PreferredFor(subnet netip.Prefix, identity string) netip.Addr {
+	if identity == "" || !subnet.IsValid() {
+		return netip.Addr{}
+	}
+	h := fnv.New32a()
+	_, _ = h.Write([]byte(identity))
+	return hostAt(subnet, FirstGuestOffset+int(h.Sum32()%uint32(MaxGuests)))
+}
+
+// AllocatePreferred is Allocate that tries prefer first. A preferred address
+// outside the subnet, the host's own, or already leased falls back to the next
+// free one.
+func (a *Allocator) AllocatePreferred(roomID, peerID string, prefer netip.Addr) (netip.Addr, error) {
+	if prefer.IsValid() && peerID != "" {
+		a.mu.Lock()
+		subnet, ok := a.subnets[roomID]
+		if ok && subnet.Contains(prefer) && prefer != HostAddress(subnet) && prefer != hostAt(subnet, 255) && prefer != subnet.Addr() {
+			table := a.table(subnet)
+			if addr, held := table.byPeer[peerID]; held {
+				a.mu.Unlock()
+				return addr, nil
+			}
+			if _, used := table.byAddress[prefer]; !used {
+				table.byAddress[prefer] = peerID
+				table.byPeer[peerID] = prefer
+				a.mu.Unlock()
+				return prefer, nil
+			}
+		}
+		a.mu.Unlock()
+	}
+	return a.Allocate(roomID, peerID)
+}
+
+// table returns a subnet's lease table, creating it; the caller holds a.mu.
+func (a *Allocator) table(subnet netip.Prefix) *leaseTable {
+	t, ok := a.taken[subnet]
+	if !ok {
+		t = &leaseTable{byAddress: make(map[netip.Addr]string), byPeer: make(map[string]netip.Addr)}
+		a.taken[subnet] = t
+	}
+	return t
+}
+
 // Allocate leases the next free address in a room's subnet to a peer.
 //
 // It is idempotent: a peer that already holds a lease gets the same address
@@ -245,14 +292,7 @@ func (a *Allocator) Allocate(roomID, peerID string) (netip.Addr, error) {
 		return netip.Addr{}, protocol.NewErrorf(protocol.CodeConfigInvalid,
 			"ipam: room %s has no subnet reserved", roomID)
 	}
-	table, ok := a.taken[subnet]
-	if !ok {
-		table = &leaseTable{
-			byAddress: make(map[netip.Addr]string),
-			byPeer:    make(map[string]netip.Addr),
-		}
-		a.taken[subnet] = table
-	}
+	table := a.table(subnet)
 	if addr, held := table.byPeer[peerID]; held {
 		return addr, nil
 	}

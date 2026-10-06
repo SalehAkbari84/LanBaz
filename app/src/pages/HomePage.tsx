@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Activity, ChevronDown, DoorOpen, Gauge, Layers, Plus, Power, ShieldAlert, Users, Wifi } from 'lucide-react'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 
+import { GameFirewallBanner } from '../components/GameFirewallBanner'
 import { Avatar, Banner, Card, CopyButton, EmptyState, PageHeader, PingBadge, SectionTitle, StateDot } from '../components/ui'
 import { useNumber, useT } from '../i18n'
 import { isTauri } from '../services/tauri'
@@ -42,6 +43,7 @@ export function HomePage() {
   return (
     <>
       <PageHeader title={t('home.title')} subtitle={t('home.subtitle')} />
+      <GameFirewallBanner />
 
       <SupervisionNotice />
       {elevated === false ? (

@@ -65,6 +65,7 @@ func (d *Daemon) diagnose(ctx context.Context) protocol.DiagnoseReport {
 	}
 	wg.Wait()
 	rep := buildReport(nat, turn, st.AllowRelay || len(relays) > 0, time.Since(start))
+	rep.PortMapping = webrtc.RouterPortMapping(ctx, d.log)
 	d.log.Info("connection check", "nat", rep.NAT, "public_ip", rep.PublicIP,
 		"working_stun", len(rep.Working), "advice", rep.Advice)
 	return rep

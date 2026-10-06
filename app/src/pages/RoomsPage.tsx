@@ -11,7 +11,10 @@ import {
   DoorOpen,
   FileDown,
   Link2,
+  Lock,
   LogOut,
+  Network,
+  Paperclip,
   Pin,
   Plus,
   RefreshCw,
@@ -25,15 +28,17 @@ import {
 } from 'lucide-react'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 
+import { GameFirewallBanner } from '../components/GameFirewallBanner'
 import { Avatar, Banner, Card, CopyButton, EmptyState, PageHeader, PingBadge, SectionTitle, Segmented, Sparkline, StateDot, useNow, writeClipboard } from '../components/ui'
 import { TapDriverNotice } from '../components/TapDriverNotice'
 import { VoicePanel } from '../components/VoicePanel'
 import { FilesPanel, useFileDrop } from '../components/FilesPanel'
 import { useNumber, useT } from '../i18n'
 import { readClipboardText, saveInviteFile } from '../services/tauri'
-import { useDaemonStore } from '../stores/daemon'
+import { daemonClient, useDaemonStore } from '../stores/daemon'
 import { useFriendsStore } from '../stores/friends'
 import { useGamesStore } from '../stores/games'
+import { useFiles } from '../stores/files'
 import { useKept } from '../stores/kept'
 import { qualityKey, useQuality } from '../stores/quality'
 import { sortPeers, useRoomsStore, type RoomAction } from '../stores/rooms'
@@ -84,6 +89,7 @@ export function RoomsPage() {
   return (
     <>
       <PageHeader title={t('rooms.title')} subtitle={t('rooms.subtitle')} />
+      <GameFirewallBanner />
 
       {lastError ? (
         <Banner tone="error" onClose={clearError}>
@@ -257,6 +263,36 @@ function JoinCard({ disabled, busy }: { disabled: boolean; busy: RoomAction | nu
 
 // -------------------------------------------------------------------- room --
 
+/** Host: switch the open room between standard and classic LAN, live. */
+function ModeSwitch({ room }: { room: RoomSummary }) {
+  const t = useT()
+  const [busy, setBusy] = useState(false)
+  const classic = room.mode === 'l2'
+  const flip = async () => {
+    setBusy(true)
+    try {
+      await daemonClient()?.request('room.set_mode', { room_id: room.room_id, mode: classic ? 'l3' : 'l2' }, 120_000)
+      toast({ tone: 'ok', title: classic ? t('rooms.nowStandard') : t('rooms.nowClassic'), key: `mode:${room.room_id}` })
+    } catch (e) {
+      toast({ tone: 'error', title: e instanceof Error ? e.message : String(e) }, 9000)
+    } finally {
+      setBusy(false)
+    }
+  }
+  return (
+    <button
+      type="button"
+      className={`chip cursor-pointer hover:bg-white/10 ${classic ? 'border-accent-2/40 text-accent-2' : ''}`}
+      title={t('rooms.modeSwitchHint')}
+      disabled={busy}
+      onClick={() => void flip()}
+    >
+      {busy ? <RefreshCw size={11} className="animate-spin" /> : <Network size={11} />}
+      {classic ? t('rooms.modeChip') : t('rooms.modeStandard')}
+    </button>
+  )
+}
+
 /** Keep this network: reopen it (host) or rejoin it (guest) automatically. */
 function KeepToggle({ room }: { room: RoomSummary }) {
   const t = useT()
@@ -310,7 +346,11 @@ function RoomCard({ room, network, busy }: { room: RoomSummary; network: Network
             <div className="flex items-center gap-2">
               <h2 className="truncate text-lg font-semibold text-white">{room.name}</h2>
               <span className="chip">{room.is_host ? t('common.host') : t('common.guest')}</span>
-              {room.mode === 'l2' ? <span className="chip border-accent-2/40 text-accent-2">{t('rooms.modeChip')}</span> : null}
+              {room.is_host ? (
+                <ModeSwitch room={room} />
+              ) : room.mode === 'l2' ? (
+                <span className="chip border-accent-2/40 text-accent-2">{t('rooms.modeChip')}</span>
+              ) : null}
             </div>
             <div className="mt-0.5 text-xs text-slate-500">
               {t('rooms.seats', { online: num(online), used: num(others.length), max: num(room.max_peers) })}
@@ -557,6 +597,8 @@ function PlayerRow({ room, peer, busy }: { room: RoomSummary; peer: PeerSummary;
   const t = useT()
   const pingPeer = useRoomsStore((s) => s.pingPeer)
   const kickPeer = useRoomsStore((s) => s.kickPeer)
+  const pickAndSend = useFiles((s) => s.pickAndSend)
+  const fixedIp = useKept((s) => s.kept?.rooms.includes(room.room_id) ?? false)
   const presence = useGamesStore((s) => (peer.is_self ? s.presence[''] : s.presence[peer.peer_id]))
   const id = peer.peer_id || peer.link_id || ''
   const name = peer.display_name || (peer.peer_id ? peer.peer_id.slice(0, 10) : t('rooms.connecting'))
@@ -585,8 +627,9 @@ function PlayerRow({ room, peer, busy }: { room: RoomSummary; peer: PeerSummary;
           {presence?.game_name ? <span className="truncate text-xs text-accent-2">{presence.game_name}</span> : null}
         </div>
       </div>
-      <span className="ltr hidden w-32 font-mono text-xs text-slate-400 md:inline">
+      <span className="ltr hidden w-32 items-center gap-1 font-mono text-xs text-slate-400 md:inline-flex" title={fixedIp ? t('rooms.fixedIp') : undefined}>
         {peer.is_self ? room.local_address : peer.virtual_address ?? '—'}
+        {fixedIp ? <Lock size={11} className="shrink-0 text-emerald-300/80" aria-label={t('rooms.fixedIp')} /> : null}
       </span>
       {peer.is_self ? (
         <span className="w-20" />
@@ -600,6 +643,16 @@ function PlayerRow({ room, peer, busy }: { room: RoomSummary; peer: PeerSummary;
             <PingBadge ms={peer.rtt_ms} measured={peer.round_trips > 0 && isUsable(peer.state)} />
             {peer.packet_loss >= 0.02 && isUsable(peer.state) ? <span className="ltr block text-[10px] text-amber-300">{t('rooms.loss', { n: Math.round(peer.packet_loss * 100) })}</span> : null}
           </span>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            onClick={() => void pickAndSend(room.room_id, peer.peer_id)}
+            disabled={!peer.peer_id || !isUsable(peer.state)}
+            title={t('files.send')}
+            aria-label={t('files.send')}
+          >
+            <Paperclip size={14} />
+          </button>
           <button
             type="button"
             className="btn btn-ghost btn-sm"

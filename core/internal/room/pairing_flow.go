@@ -54,6 +54,12 @@ func newGuestPeerID() (transport.PeerID, error) {
 // fingerprint, so replaying a previous offer would offer a peer a link that is
 // already compromised to anyone who saw the first code.
 func (r *Room) IssuePairing(ctx context.Context, ttl time.Duration) (protocol.PairingResponse, error) {
+	return r.IssuePairingFor(ctx, ttl, "")
+}
+
+// IssuePairingFor issues a code for a known player (their LanBaz identity), so
+// the address it carries is that player's fixed one.
+func (r *Room) IssuePairingFor(ctx context.Context, ttl time.Duration, identity string) (protocol.PairingResponse, error) {
 	if !r.isHost {
 		return protocol.PairingResponse{}, protocol.NewError(protocol.CodePeerRejected,
 			"room: only the host issues pairing codes")
@@ -96,7 +102,7 @@ func (r *Room) IssuePairing(ctx context.Context, ttl time.Duration) (protocol.Pa
 	// the only one that can promise an address is free. Naming it in the code
 	// means the guest knows its own address the moment it decodes - no extra
 	// round trip in a handshake that already needs a human to carry two blobs.
-	guestAddr, err := r.allocateGuestAddr(string(guestID))
+	guestAddr, err := r.allocateGuestAddr(string(guestID), identity)
 	if err != nil {
 		return protocol.PairingResponse{}, err
 	}

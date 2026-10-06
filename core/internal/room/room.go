@@ -75,6 +75,8 @@ type Room struct {
 
 	maxPeers    int
 	gameProfile string
+	wantSubnet  netip.Prefix
+	leaseHints  map[string]netip.Addr
 	createdAt   time.Time
 
 	// secret is the room secret carried by every pairing code. Both sides
@@ -136,6 +138,8 @@ type Room struct {
 	// onHostGone is called (on a guest) once the link to the host is gone
 	// for good: the host said goodbye, kicked us, or the link failed.
 	onHostGone func(reason string)
+	// onModeChange is called (on a guest) when the host switches the mode.
+	onModeChange func(mode string)
 
 	closeOnce sync.Once
 	done      chan struct{}
@@ -205,6 +209,12 @@ type Options struct {
 	PairingTTL time.Duration
 	// GameProfile names a profile under profiles/. Validated in Phase 5.
 	GameProfile string
+	// KeepSubnet asks a hosted room for this exact subnet (a kept network keeps
+	// its addresses across restarts). It falls back to the derived one if taken.
+	KeepSubnet netip.Prefix
+	// LeaseHints are remembered addresses by player identity; a returning
+	// player gets theirs back when it is free.
+	LeaseHints map[string]netip.Addr
 	// OwnerKey is the local Ed25519 private key in its 64-byte form. The room
 	// never signs with it; it is passed straight to the transport and the peer
 	// manager, which own every use of it, so there is exactly one hop between
@@ -308,6 +318,8 @@ func Create(opts Options) (*Room, error) {
 		isHost:         true,
 		maxPeers:       maxPeers,
 		gameProfile:    opts.GameProfile,
+		wantSubnet:     opts.KeepSubnet,
+		leaseHints:     opts.LeaseHints,
 		createdAt:      now(),
 		tr:             opts.Transport,
 		pm:             opts.Peers,
@@ -332,6 +344,7 @@ func Create(opts Options) (*Room, error) {
 	r.installMesh()
 	r.installPresence()
 	r.installSignals()
+	r.installModeSync()
 	return r, nil
 }
 

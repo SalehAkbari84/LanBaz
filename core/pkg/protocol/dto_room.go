@@ -152,6 +152,11 @@ type RoomCreateRequest struct {
 	GameProfile string `json:"game_profile,omitempty"`
 	// Mode is "l3" or "l2"; empty uses the configured default.
 	Mode string `json:"mode,omitempty"`
+	// Subnet asks for this exact subnet ("10.200.17.0/24"), used by kept
+	// networks so addresses survive a restart. Empty derives one.
+	Subnet string `json:"subnet,omitempty"`
+	// Leases are remembered addresses by player identity.
+	Leases map[string]string `json:"leases,omitempty"`
 }
 
 // RoomCreateResponse is returned by room.create and contains the one thing the
@@ -208,6 +213,9 @@ type RoomRegeneratePairingRequest struct {
 	RoomID string `json:"room_id"`
 	// TTLSeconds overrides the room's configured pairing lifetime.
 	TTLSeconds int `json:"ttl_seconds,omitempty"`
+	// ForPeer is the LanBaz identity of the player the code is for, when
+	// known (friend invites): the code then carries their fixed address.
+	ForPeer string `json:"for_peer,omitempty"`
 }
 
 // PairingResponse is returned by room.regenerate_pairing.

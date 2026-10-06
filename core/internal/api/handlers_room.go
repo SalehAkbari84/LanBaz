@@ -45,6 +45,7 @@ type RoomService interface {
 	SendChat(roomID, text string) (protocol.ChatMessage, error)
 	ChatHistory(roomID string) ([]protocol.ChatMessage, error)
 	SendVoice(roomID, to string, data json.RawMessage) error
+	SetMode(ctx context.Context, roomID, mode string) (protocol.RoomSummary, error)
 }
 
 // SetRoomService installs the room service and registers the room and peer
@@ -74,6 +75,7 @@ func (s *Server) SetRoomService(svc RoomService) error {
 		protocol.MethodPairingInspect:        s.handlePairingInspect,
 		protocol.MethodChatSend:              s.handleChatSend,
 		protocol.MethodVoiceSignal:           s.handleVoiceSignal,
+		protocol.MethodRoomSetMode:           s.handleRoomSetMode,
 		protocol.MethodChatHistory:           s.handleChatHistory,
 	} {
 		if err := s.Register(method, h); err != nil {
@@ -494,6 +496,21 @@ func (s *Server) handleChatSend(_ context.Context, params json.RawMessage) (any,
 		return nil, protocol.NewError(protocol.CodeBadRequest, "api: chat.send needs a room id")
 	}
 	return svc.SendChat(req.RoomID, req.Text)
+}
+
+func (s *Server) handleRoomSetMode(ctx context.Context, params json.RawMessage) (any, error) {
+	svc, err := s.requireRooms()
+	if err != nil {
+		return nil, err
+	}
+	var req struct {
+		RoomID string `json:"room_id"`
+		Mode   string `json:"mode"`
+	}
+	if err := decode(params, &req); err != nil {
+		return nil, err
+	}
+	return svc.SetMode(ctx, req.RoomID, req.Mode)
 }
 
 func (s *Server) handleVoiceSignal(_ context.Context, params json.RawMessage) (any, error) {

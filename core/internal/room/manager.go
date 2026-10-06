@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log/slog"
+	"net/netip"
 	"sync"
 	"time"
 
@@ -299,6 +300,19 @@ func (m *Manager) Create(ctx context.Context, req protocol.RoomCreateRequest) (p
 	}
 	opts.MaxPeers = req.MaxPeers
 	opts.GameProfile = req.GameProfile
+	if req.Subnet != "" {
+		if p, err := netip.ParsePrefix(req.Subnet); err == nil {
+			opts.KeepSubnet = p.Masked()
+		}
+	}
+	if len(req.Leases) > 0 {
+		opts.LeaseHints = map[string]netip.Addr{}
+		for id, a := range req.Leases {
+			if addr, err := netip.ParseAddr(a); err == nil {
+				opts.LeaseHints[id] = addr
+			}
+		}
+	}
 	opts.OnEvent = func(n Notice) { m.emit(n) }
 	opts.Now = m.now
 
@@ -397,6 +411,7 @@ func (m *Manager) Join(ctx context.Context, req protocol.RoomJoinRequest) (proto
 	// rendered.
 	r.isHost = false
 	r.onHostGone = func(reason string) { m.dropGuestRoom(r.ID(), reason) }
+	r.onModeChange = func(mode string) { m.guestModeChanged(r, mode) }
 	if err := m.adopt(ctx, r); err != nil {
 		_ = r.Close(ctx)
 		return protocol.RoomJoinResponse{}, err
@@ -449,7 +464,7 @@ func (m *Manager) RegeneratePairing(ctx context.Context, req protocol.RoomRegene
 	if err != nil {
 		return protocol.PairingResponse{}, err
 	}
-	return r.IssuePairing(ctx, time.Duration(req.TTLSeconds)*time.Second)
+	return r.IssuePairingFor(ctx, time.Duration(req.TTLSeconds)*time.Second, req.ForPeer)
 }
 
 // Get returns one room.

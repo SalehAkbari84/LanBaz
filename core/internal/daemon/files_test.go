@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net"
 	"net/netip"
 	"os"
@@ -171,5 +172,18 @@ func TestSafeFileName(t *testing.T) {
 		if got := safeFileName(in); got != want {
 			t.Errorf("safeFileName(%q) = %q, want %q", in, got, want)
 		}
+	}
+}
+
+func TestFinishedTransfersArePruned(t *testing.T) {
+	f := &fileSvc{t: map[string]*transfer{}}
+	for i := 0; i < keepFinished+10; i++ {
+		tr := &transfer{info: protocol.FileTransfer{ID: fmt.Sprint(i), State: "done"}, ended: time.Unix(int64(i), 0)}
+		f.t[tr.info.ID] = tr
+	}
+	f.t["live"] = &transfer{info: protocol.FileTransfer{ID: "live", State: "transferring"}}
+	f.pruneLocked()
+	if len(f.t) != keepFinished+1 || f.t["live"] == nil || f.t["0"] != nil || f.t[fmt.Sprint(keepFinished+9)] == nil {
+		t.Fatalf("kept %d transfers", len(f.t))
 	}
 }

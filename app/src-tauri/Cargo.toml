@@ -1,6 +1,6 @@
 [package]
 name = "lanbaz"
-version = "0.5.2"
+version = "0.6.2"
 description = "LanBaz - open source LAN gaming network"
 authors = ["LanBaz contributors"]
 edition = "2021"

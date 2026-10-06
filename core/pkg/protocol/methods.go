@@ -10,11 +10,14 @@ const (
 	MethodHello = "hello"
 
 	// Room (Phase 1+).
-	MethodRoomCreate            = "room.create"
-	MethodRoomJoin              = "room.join"
-	MethodRoomAccept            = "room.accept"
-	MethodRoomLeave             = "room.leave"
-	MethodRoomClose             = "room.close"
+	MethodRoomCreate = "room.create"
+	MethodRoomJoin   = "room.join"
+	MethodRoomAccept = "room.accept"
+	MethodRoomLeave  = "room.leave"
+	MethodRoomClose  = "room.close"
+	// MethodRoomSetMode switches a hosted room between standard and classic LAN
+	// while it stays open.
+	MethodRoomSetMode           = "room.set_mode"
 	MethodRoomGet               = "room.get"
 	MethodRoomList              = "room.list"
 	MethodRoomRegeneratePairing = "room.regenerate_pairing"
@@ -63,8 +66,11 @@ const (
 	EventDaemonLog      = "daemon.log"
 
 	// Reserved for later phases; declared for a single source of truth.
-	EventRoomCreated    = "room.created"
-	EventRoomClosed     = "room.closed"
+	EventRoomCreated = "room.created"
+	EventRoomClosed  = "room.closed"
+	// EventRoomUpdated carries a RoomEvent when a room changed in place
+	// (its network type, for one).
+	EventRoomUpdated    = "room.updated"
 	EventPeerJoined     = "peer.joined"
 	EventPeerLeft       = "peer.left"
 	EventPeerState      = "peer.state"
@@ -87,8 +93,8 @@ func Methods() []string {
 		MethodNetworkStatus, MethodNetworkInterface, MethodNetworkRoutes, MethodNetworkDiagnose,
 		MethodGameList, MethodGameDetect, MethodGameLaunch, MethodGameProfileGet,
 		MethodSettingsGet, MethodSettingsSet, MethodPairingInspect,
-		MethodChatSend, MethodChatHistory, MethodVoiceSignal,
-		MethodFileOffer, MethodFileRespond, MethodFileCancel, MethodFileList,
+		MethodChatSend, MethodChatHistory, MethodVoiceSignal, MethodRoomSetMode,
+		MethodFileOffer, MethodFileRespond, MethodFileCancel, MethodFileList, MethodDiagBundle, MethodGameFirewall, MethodGameFirewallFix, MethodGameApply,
 		MethodDaemonStatus, MethodDaemonVersion, MethodDaemonShutdown,
 		MethodFriendsList, MethodFriendsAdd, MethodFriendsRespond, MethodFriendsRemove,
 		MethodFriendsTrust, MethodJoinRequest, MethodJoinInvite, MethodJoinRespond,
@@ -99,10 +105,10 @@ func Methods() []string {
 // Events returns every declared event name. Used by tests and docs.
 func Events() []string {
 	return []string{
-		EventDaemonState, EventDaemonStopping, EventDaemonLog,
+		EventRoomUpdated, EventDaemonState, EventDaemonStopping, EventDaemonLog,
 		EventRoomCreated, EventRoomClosed,
 		EventPeerJoined, EventPeerLeft, EventPeerState, EventPeerStats, EventPeerConnected,
-		EventNetworkChanged, EventGameDetected, EventChatMessage, EventVoiceSignal, EventFileUpdate, EventPeerPresence,
+		EventNetworkChanged, EventGameDetected, EventChatMessage, EventVoiceSignal, EventFileUpdate, EventGameFirewall, EventPeerPresence,
 		EventFriendUpdate, EventJoinPrompt, EventJoinStatus,
 	}
 }

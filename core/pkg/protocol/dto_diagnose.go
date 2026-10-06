@@ -18,6 +18,9 @@ type DiagnoseReport struct {
 	Advice string `json:"advice"`
 	// DurationMS is how long the check took.
 	DurationMS int64 `json:"duration_ms"`
+	// PortMapping says whether the home router forwards ports (UPnP or
+	// NAT-PMP) and its external address, or why not.
+	PortMapping string `json:"port_mapping,omitempty"`
 }
 
 // DiagnoseServer is one server's result.

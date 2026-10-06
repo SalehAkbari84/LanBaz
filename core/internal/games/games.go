@@ -35,6 +35,8 @@ type Detection struct {
 	Profile *profiles.Profile // nil for an unknown game
 	Exe     string
 	PID     uint32
+	// Path is the game's full executable path, when Windows tells.
+	Path string
 	// Ports are the ports the game listens on that friends can reach.
 	Ports []int
 }
@@ -101,7 +103,7 @@ func (d *Detector) Detect() (Detection, bool) {
 		var det *Detection
 		if prof, ok := profiles.Pick(d.index[p.Exe], p.Path); ok {
 			pc := prof
-			det = &Detection{Profile: &pc, Exe: p.Exe, PID: p.PID, Ports: reachablePorts(p.Sockets, &pc)}
+			det = &Detection{Profile: &pc, Exe: p.Exe, PID: p.PID, Path: p.Path, Ports: reachablePorts(p.Sockets, &pc)}
 		} else if systemProcess(p) {
 			continue
 		} else if ports := lanbazBound(p.Sockets); len(ports) > 0 {
@@ -116,6 +118,9 @@ func (d *Detector) Detect() (Detection, bool) {
 	}
 	if best == nil {
 		return Detection{}, false
+	}
+	if best.Path == "" {
+		best.Path = imagePath(best.PID)
 	}
 	return *best, true
 }

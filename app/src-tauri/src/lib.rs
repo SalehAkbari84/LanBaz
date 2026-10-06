@@ -30,7 +30,7 @@ use std::{
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
-    Manager,
+    Emitter, Manager,
 };
 use tauri_plugin_shell::process::{CommandChild, CommandEvent};
 use tauri_plugin_shell::ShellExt;
@@ -111,6 +111,7 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(updater::Pending::default())
+        .manage(updater::Downloaded::default())
         .manage(DaemonProcesses::default())
         .manage(DaemonArgs::default())
         .invoke_handler(tauri::generate_handler![
@@ -130,12 +131,17 @@ pub fn run() {
             invite::save_invite_file,
             system::open_game_uri,
             system::install_tap_driver,
+            system::restart_app,
             updater::update_status,
             updater::update_set_repo,
             updater::update_check,
             updater::update_install,
+            updater::update_download,
+            updater::update_apply,
             ptt::ptt_set_key,
             files::reveal_received,
+            files::pick_files,
+            tray_set_networks,
         ])
         .setup(move |app| {
             build_tray(app.handle())?;
@@ -174,21 +180,64 @@ pub fn run() {
         .expect("error while running the LanBaz shell");
 }
 
-fn build_tray(app: &tauri::AppHandle) -> Result<(), Box<dyn std::error::Error>> {
+/// One line of the tray's network list, sent by the UI (`tray_set_networks`).
+#[derive(Clone, serde::Deserialize)]
+pub struct TrayNet {
+    /// The open room it stands for, if any; clicking it opens that room.
+    room: Option<String>,
+    label: String,
+}
+
+/// The tray menu: the kept networks (and open rooms) first, then the actions.
+fn tray_menu(app: &tauri::AppHandle, nets: &[TrayNet]) -> tauri::Result<Menu<tauri::Wry>> {
     let show = MenuItem::with_id(app, "show", "Show LanBaz", true, None::<&str>)?;
     let overlay_label = format!("Overlay ({})", hotkey::HOTKEY_LABEL);
     let overlay = MenuItem::with_id(app, "overlay", &overlay_label, true, None::<&str>)?;
     let start = MenuItem::with_id(app, "start", "Start daemon", true, None::<&str>)?;
     let stop = MenuItem::with_id(app, "stop", "Stop daemon", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "Quit LanBaz", true, None::<&str>)?;
-    let sep1 = PredefinedMenuItem::separator(app)?;
-    let sep2 = PredefinedMenuItem::separator(app)?;
-    let sep3 = PredefinedMenuItem::separator(app)?;
 
-    let menu = Menu::with_items(
-        app,
-        &[&show, &sep1, &overlay, &sep2, &start, &stop, &sep3, &quit],
-    )?;
+    let menu = Menu::new(app)?;
+    if !nets.is_empty() {
+        let title = MenuItem::with_id(app, "nets", "Networks", false, None::<&str>)?;
+        menu.append(&title)?;
+        for (i, n) in nets.iter().take(12).enumerate() {
+            let id = match &n.room {
+                Some(room) => format!("net:{room}"),
+                None => format!("netinfo:{i}"),
+            };
+            menu.append(&MenuItem::with_id(app, id, &n.label, true, None::<&str>)?)?;
+        }
+        menu.append(&PredefinedMenuItem::separator(app)?)?;
+    }
+    menu.append(&show)?;
+    menu.append(&PredefinedMenuItem::separator(app)?)?;
+    menu.append(&overlay)?;
+    menu.append(&PredefinedMenuItem::separator(app)?)?;
+    menu.append(&start)?;
+    menu.append(&stop)?;
+    menu.append(&PredefinedMenuItem::separator(app)?)?;
+    menu.append(&quit)?;
+    Ok(menu)
+}
+
+/// Replaces the tray's network list.
+#[tauri::command]
+fn tray_set_networks(app: tauri::AppHandle, nets: Vec<TrayNet>) -> Result<(), String> {
+    let tray = app.tray_by_id("lanbaz-tray").ok_or("no tray icon")?;
+    let menu = tray_menu(&app, &nets).map_err(|e| e.to_string())?;
+    tray.set_menu(Some(menu)).map_err(|e| e.to_string())?;
+    let tip = if nets.is_empty() {
+        "LanBaz".to_string()
+    } else {
+        let lines: Vec<&str> = nets.iter().take(4).map(|n| n.label.as_str()).collect();
+        format!("LanBaz\n{}", lines.join("\n"))
+    };
+    tray.set_tooltip(Some(tip)).map_err(|e| e.to_string())
+}
+
+fn build_tray(app: &tauri::AppHandle) -> Result<(), Box<dyn std::error::Error>> {
+    let menu = tray_menu(app, &[])?;
 
     let icon = app
         .default_window_icon()
@@ -229,6 +278,11 @@ fn build_tray(app: &tauri::AppHandle) -> Result<(), Box<dyn std::error::Error>> 
                     let _ = daemon::stop_daemon(handle.clone()).await;
                     handle.exit(0);
                 });
+            }
+            id if id.starts_with("net:") || id.starts_with("netinfo:") => {
+                show_main_window(app);
+                let room = id.strip_prefix("net:").unwrap_or("").to_string();
+                let _ = app.emit("tray-open-network", room);
             }
             _ => {}
         })

@@ -15,6 +15,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/netip"
 	"os/exec"
 	"strings"
 	"sync"
@@ -297,15 +298,21 @@ func (a *Adapter) Configure(ctx context.Context, addr network.AddressInfo) error
 	if !host.Is4() {
 		return protocol.NewError(protocol.CodeConfigInvalid, "tap: no IPv4 address to configure")
 	}
-	script := fmt.Sprintf(
-		"$ErrorActionPreference='Stop';"+
-			"$i=Get-NetAdapter -Name '%[1]s';"+
-			"Remove-NetIPAddress -InterfaceIndex $i.ifIndex -AddressFamily IPv4 -Confirm:$false -ErrorAction SilentlyContinue;"+
-			"Set-NetIPInterface -InterfaceIndex $i.ifIndex -Dhcp Disabled -ErrorAction SilentlyContinue;"+
-			"New-NetIPAddress -InterfaceIndex $i.ifIndex -IPAddress '%[2]s' -PrefixLength %[3]d | Out-Null",
-		psq(alias), host, bits)
-	if out, err := ps(ctx, script); err != nil {
-		return protocol.NewErrorf(protocol.CodeWintunCreateFailed, "tap: could not configure %s: %v (%s)", host, err, out)
+	// The TAP adapter outlives LanBaz, and its "Internet Protocol Version 4"
+	// binding can be switched off by hand or by another TAP-based program (VPN
+	// clients ship the same driver). Without it the adapter has no IPv4
+	// interface at all and New-NetIPAddress fails with "Element not found"
+	// (Windows error 1168) - seen on a player's PC. So the binding is turned
+	// back on, for this adapter only, and the IPv4 interface is waited for.
+	script := addressScript(alias, host, bits)
+	out, err := ps(ctx, script)
+	if strings.Contains(out, "ipv4-was-off") {
+		a.log.Info("IPv4 was turned off on the classic LAN adapter; turned it back on", "adapter", alias)
+	}
+	if err != nil {
+		return protocol.NewErrorf(protocol.CodeWintunCreateFailed,
+			"classic LAN adapter %s could not get the address %s: %v (%s). In Control Panel → Network Connections → %s → Properties, \"Internet Protocol Version 4\" must be ticked",
+			alias, host, err, strings.TrimSpace(out), alias)
 	}
 	var notes []string
 	metric := "-AutomaticMetric Disabled -InterfaceMetric 1 "
@@ -469,4 +476,19 @@ func (a *Adapter) Alias() string {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	return a.alias
+}
+
+// addressScript turns IPv4 back on for the adapter if needed, waits for its
+// IPv4 interface and gives it the room address.
+func addressScript(alias string, host netip.Addr, bits int) string {
+	return fmt.Sprintf(
+		"$ErrorActionPreference='Stop';"+
+			"$i=Get-NetAdapter -Name '%[1]s';"+
+			"$b=Get-NetAdapterBinding -Name '%[1]s' -ComponentID ms_tcpip -ErrorAction SilentlyContinue;"+
+			"if ($b -and -not $b.Enabled) { Enable-NetAdapterBinding -Name '%[1]s' -ComponentID ms_tcpip; 'ipv4-was-off' };"+
+			"for ($n=0; $n -lt 40 -and -not (Get-NetIPInterface -InterfaceIndex $i.ifIndex -AddressFamily IPv4 -ErrorAction SilentlyContinue); $n++) { Start-Sleep -Milliseconds 250 };"+
+			"Remove-NetIPAddress -InterfaceIndex $i.ifIndex -AddressFamily IPv4 -Confirm:$false -ErrorAction SilentlyContinue;"+
+			"Set-NetIPInterface -InterfaceIndex $i.ifIndex -Dhcp Disabled -ErrorAction SilentlyContinue;"+
+			"New-NetIPAddress -InterfaceIndex $i.ifIndex -IPAddress '%[2]s' -PrefixLength %[3]d | Out-Null",
+		psq(alias), host, bits)
 }

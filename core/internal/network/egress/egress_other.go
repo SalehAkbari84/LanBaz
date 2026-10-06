@@ -4,7 +4,10 @@
 // elsewhere it is a plain listen.
 package egress
 
-import "net"
+import (
+	"net"
+	"net/netip"
+)
 
 // Enabled reports whether bypassing is on.
 func Enabled() bool { return false }
@@ -16,3 +19,6 @@ func ListenUDP(network string, laddr *net.UDPAddr) (*net.UDPConn, error) {
 
 // Physical is not implemented off Windows.
 func Physical() (int, string) { return 0, "" }
+
+// PhysicalGateway is not implemented off Windows.
+func PhysicalGateway() (local, gateway netip.Addr) { return }

@@ -36,6 +36,7 @@ import (
 	"github.com/lanbaz/lanbaz/core/internal/transport"
 	"github.com/lanbaz/lanbaz/core/internal/transport/webrtc"
 	"github.com/lanbaz/lanbaz/core/pkg/protocol"
+	"github.com/lanbaz/lanbaz/profiles"
 )
 
 // BuildInfo carries the version metadata injected at link time.
@@ -46,7 +47,7 @@ type BuildInfo struct {
 }
 
 // DefaultBuildInfo is used when ldflags were not provided (go run, tests).
-var DefaultBuildInfo = BuildInfo{Version: "0.5.2-dev", Commit: "unknown", BuildTime: "unknown"}
+var DefaultBuildInfo = BuildInfo{Version: "0.6.2-dev", Commit: "unknown", BuildTime: "unknown"}
 
 // Daemon is the running control plane.
 type Daemon struct {
@@ -62,6 +63,12 @@ type Daemon struct {
 	// friends is the friend system; nil when it is unavailable.
 	friends *friends
 	files   *fileSvc
+	// ring is the developer log, for the diagnostics bundle.
+	ring *logging.Ring
+	// diagDir is where diagnostics bundles are written.
+	diagDir string
+	// fw is the last firewall check of the running game.
+	fw firewallState
 	// gameRunning is true while a game is detected; file transfers slow down.
 	gameRunning atomic.Bool
 	// metered holds relay servers fetched from a Metered account.
@@ -74,6 +81,8 @@ type Daemon struct {
 	settings *settings.Store
 	// detector notices the game this machine runs.
 	detector *games.Detector
+	// profiles are the bundled game profiles.
+	profiles []profiles.Profile
 
 	// The virtual network. See network.go: the daemon owns the decision about
 	// which adapter backend to use, and the network package owns everything
@@ -213,6 +222,7 @@ func New(opts Options) (*Daemon, error) {
 		return nil, err
 	}
 	if opts.LogRing != nil {
+		d.ring = opts.LogRing
 		d.registerLogs(opts.LogRing)
 	}
 	bus := opts.SocialBus
@@ -231,6 +241,16 @@ func New(opts Options) (*Daemon, error) {
 		if err := d.files.register(); err != nil {
 			return nil, err
 		}
+		d.diagDir = d.files.dir
+	}
+	if err := d.registerDiag(); err != nil {
+		return nil, err
+	}
+	if err := d.registerFirewall(); err != nil {
+		return nil, err
+	}
+	if err := d.registerGameApply(); err != nil {
+		return nil, err
 	}
 	return d, nil
 }
@@ -343,10 +363,15 @@ type settingsService struct{ d *Daemon }
 func (s settingsService) Get() protocol.Settings { return s.d.settings.Get() }
 
 func (s settingsService) Set(next protocol.Settings) (protocol.Settings, error) {
+	before := s.d.settings.Get()
 	saved, err := s.d.settings.Set(next)
 	if err != nil {
 		return protocol.Settings{}, err
 	}
+	// Applied to open rooms right away, without closing them: a new network
+	// type switches hosted rooms live, and adapter settings rebuild the
+	// adapters in place. Guests follow their host's type.
+	go s.d.applyLive(settings.Net(before), settings.Net(saved))
 	if rooms := s.d.Rooms(); rooms != nil {
 		rooms.SetTransportDefaults(s.d.transportDefaults(saved))
 		name := saved.DisplayName
@@ -779,4 +804,37 @@ func (d *Daemon) registerLogs(ring *logging.Ring) {
 		_ = json.Unmarshal(raw, &req)
 		return ring.Since(req.After), nil
 	})
+}
+
+// applyLive pushes changed network settings into the rooms that are open.
+func (d *Daemon) applyLive(before, after protocol.NetworkSettings) {
+	rooms := d.Rooms()
+	if rooms == nil {
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer cancel()
+	switched := map[string]bool{}
+	if after.RoomMode != before.RoomMode && after.RoomMode != "" {
+		for _, r := range rooms.All() {
+			if !r.IsHost() || r.Mode() == after.RoomMode {
+				continue
+			}
+			if _, err := rooms.SetMode(ctx, r.ID(), after.RoomMode); err != nil {
+				d.log.Warn("could not switch an open room to the new network type", "room", r.ID(), "error", err)
+				continue
+			}
+			switched[r.ID()] = true
+		}
+	}
+	if before.MTU != after.MTU || before.InterfacePriority != after.InterfacePriority ||
+		before.RelayDiscovery != after.RelayDiscovery || before.BroadcastRate != after.BroadcastRate {
+		for _, r := range rooms.All() {
+			if switched[r.ID()] || r.Network() == nil {
+				continue // already rebuilt, or no network to rebuild
+			}
+			d.log.Info("applying the new network settings to an open room", "room", r.ID())
+			rooms.RebuildRoomNetwork(ctx, r.ID())
+		}
+	}
 }

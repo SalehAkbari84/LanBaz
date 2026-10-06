@@ -15,6 +15,7 @@ import { usePrefs } from './prefs'
 import { useQuality } from './quality'
 import { useVoice } from './voice'
 import { useFiles, type FileTransfer } from './files'
+import { useGameFirewall, type GameFirewall } from './gameFirewall'
 import { useRoomsStore } from './rooms'
 import { toast } from './toasts'
 import { translate } from '../i18n'
@@ -180,6 +181,10 @@ export const useDaemonStore = create<DaemonState>((set, get) => ({
             void useFriendsStore.getState().load()
             void useFiles.getState().load()
             void next
+              .request<GameFirewall>('game.firewall')
+              .then((fw) => useGameFirewall.setState({ fw }))
+              .catch(() => undefined)
+            void next
               .request<Presence[]>('game.detect')
               .then((list) => {
                 for (const p of list ?? []) useGamesStore.getState().applyPresence(p)
@@ -199,6 +204,10 @@ export const useDaemonStore = create<DaemonState>((set, get) => ({
         }),
         next.on<RoomEvent>(EVENT.roomCreated, (event) => {
           useRoomsStore.getState().applyRoom(event)
+        }),
+        next.on<RoomEvent>(EVENT.roomUpdated, (event) => {
+          useRoomsStore.getState().applyRoom(event)
+          void useDaemonStore.getState().refresh()
         }),
         next.on<RoomEvent>(EVENT.roomClosed, (event) => {
           useRoomsStore.getState().applyRoomClosed(event.room_id, event.reason)
@@ -250,9 +259,11 @@ export const useDaemonStore = create<DaemonState>((set, get) => ({
               tone: 'info',
               title: translate(prefs.language, 'overlay.startedGame', { name: p.name || '?', game: p.game_name }),
               who: p.name || '?',
+              key: `game:${p.peer_id}`,
             })
           }
         }),
+        next.on<GameFirewall>('game.firewall', (fw) => useGameFirewall.setState({ fw })),
         next.on<Presence>('game.detected', (p) => {
           useGamesStore.getState().applyPresence({ ...p, self: true })
         }),
@@ -361,7 +372,7 @@ export const useDaemonStore = create<DaemonState>((set, get) => ({
 function notifyPeer(key: 'overlay.joined' | 'overlay.left', name: string): void {
   const prefs = usePrefs.getState()
   if (!prefs.toastJoinLeave) return
-  toast({ tone: key === 'overlay.joined' ? 'ok' : 'info', title: translate(prefs.language, key, { name }), who: name })
+  toast({ tone: key === 'overlay.joined' ? 'ok' : 'info', title: translate(prefs.language, key, { name }), who: name, key: `peer:${name}` })
 }
 
 async function loadSettings(set: (partial: Partial<DaemonState>) => void): Promise<void> {

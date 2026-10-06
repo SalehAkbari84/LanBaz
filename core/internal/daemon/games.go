@@ -55,6 +55,7 @@ func (d *Daemon) initGames() error {
 		})
 	}
 	d.detector = games.New(ps)
+	d.profiles = ps
 	d.log.Info("game profiles loaded", "count", len(ps))
 	return d.api.SetGameService(gameService{d: d, library: library})
 }
@@ -67,6 +68,7 @@ func (d *Daemon) watchGames(ctx context.Context) {
 	ticker := time.NewTicker(detectEvery)
 	defer ticker.Stop()
 	var last *room.LocalGame
+	var lastFirewallExe string
 	for {
 		select {
 		case <-ctx.Done():
@@ -76,7 +78,9 @@ func (d *Daemon) watchGames(ctx context.Context) {
 		case <-ticker.C:
 		}
 		var next *room.LocalGame
+		var gamePath string
 		if det, ok := d.detector.Detect(); ok {
+			gamePath = det.Path
 			next = &room.LocalGame{GameID: det.ID(), GameName: det.Name(), Exe: det.Exe, Ports: det.Ports}
 			if det.Profile != nil {
 				prof := *det.Profile
@@ -89,6 +93,12 @@ func (d *Daemon) watchGames(ctx context.Context) {
 			continue
 		}
 		last = next
+		if next != nil && next.Exe != lastFirewallExe {
+			lastFirewallExe = next.Exe
+			go d.checkGameFirewall(ctx, next.GameID, next.GameName, gamePath)
+		} else if next == nil {
+			lastFirewallExe = ""
+		}
 		if next != nil {
 			d.log.Info("game detected", "game", next.GameName, "hosting", len(next.Ports) > 0, "ports", next.Ports)
 		} else {

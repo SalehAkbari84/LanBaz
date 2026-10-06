@@ -2,6 +2,7 @@ import { Gamepad2, LogIn, Play, Radio, Search, Server, Users } from 'lucide-reac
 import { useEffect, useMemo, useState } from 'react'
 
 import { Avatar, Card, CopyButton, EmptyState, PageHeader, SectionTitle, Segmented } from '../components/ui'
+import { GameApplyButton } from '../components/GameApplyButton'
 import { useT } from '../i18n'
 import { openGameUri } from '../services/tauri'
 import { useDaemonStore } from '../stores/daemon'
@@ -98,6 +99,7 @@ export function GamesPage() {
                 {g.availability?.includes('drm_free') ? <span className="chip border-sky-400/40 text-sky-300">{t('games.badgeDrmFree')}</span> : null}
                 {g.needs_l2 ? <span className="chip border-accent-2/40 text-accent-2">{t('games.needsL2')}</span> : null}
               </div>
+              <GameApplyButton gameId={g.id} />
             </li>
           ))}
         </ul>

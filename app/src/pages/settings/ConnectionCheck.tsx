@@ -50,6 +50,13 @@ export function ConnectionCheck() {
           <Row title={t('diag.nat')}>
             <span className="text-sm text-slate-200">{t(`diag.nat.${report.nat}`)}</span>
           </Row>
+          {report.port_mapping ? (
+            <Row title={t('diag.portMapping')} hint={/^(UPnP|NAT-PMP) /.test(report.port_mapping) ? t('diag.portMappingOk') : t('diag.portMappingOff')}>
+              <span className={`ltr text-xs ${/^(UPnP|NAT-PMP) /.test(report.port_mapping) ? 'text-emerald-300' : 'text-slate-400'}`}>
+                {/^(UPnP|NAT-PMP) /.test(report.port_mapping) ? report.port_mapping : t('diag.portMappingNone')}
+              </span>
+            </Row>
+          ) : null}
           {report.public_ip ? (
             <Row title={t('diag.publicIp')}>
               <span className="ltr font-mono text-sm text-slate-200">{report.public_ip}</span>

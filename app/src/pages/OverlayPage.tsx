@@ -11,11 +11,12 @@
  */
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { Crown, MessageSquare, Network, Users, X } from 'lucide-react'
+import { Crown, MessageSquare, Mic, Network, Users, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { Toaster } from '../components/Toaster'
 import { Avatar, CopyButton, PingBadge } from '../components/ui'
+import { useOverlayVoice } from '../services/bridges'
 import { useT } from '../i18n'
 import { hideOverlay, onOverlayChat, onOverlayMode, overlayStatus, setOverlayLayout, type OverlayMode } from '../services/overlay'
 import { useDaemonStore } from '../stores/daemon'
@@ -170,6 +171,7 @@ export function OverlayPage() {
 }
 
 function PlayerLine({ peer }: { peer: PeerSummary }) {
+  const talking = useOverlayVoice((v) => (peer.is_self ? v.self : v.speaking.includes(peer.peer_id)))
   const t = useT()
   const presence = useGamesStore((s) => (peer.is_self ? s.presence[''] : s.presence[peer.peer_id]))
   const name = peer.display_name || (peer.peer_id ? peer.peer_id.slice(0, 8) : '…')
@@ -193,6 +195,7 @@ function PlayerLine({ peer }: { peer: PeerSummary }) {
           {presence?.game_name ? <span className="text-accent-2">{presence.game_name}</span> : <span className="ltr">{peer.virtual_address ?? ''}</span>}
         </div>
       </div>
+      {talking ? <Mic size={13} className="shrink-0 animate-pulse text-emerald-400" aria-label={t('voice.talking')} /> : null}
       {peer.is_self ? null : <PingBadge ms={peer.rtt_ms} measured={peer.round_trips > 0 && isUsable(peer.state)} />}
     </li>
   )

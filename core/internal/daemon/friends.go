@@ -223,7 +223,7 @@ func (f *friends) onRequest(ctx context.Context, fr social.Friend, m social.Mess
 func (f *friends) sendInvite(ctx context.Context, fr social.Friend, r *room.Room) {
 	rooms := f.d.Rooms()
 	resp, err := rooms.RegeneratePairing(ctx, protocol.RoomRegeneratePairingRequest{
-		RoomID: r.ID(), TTLSeconds: int(inviteTTL / time.Second),
+		RoomID: r.ID(), TTLSeconds: int(inviteTTL / time.Second), ForPeer: fr.PeerID,
 	})
 	if err != nil {
 		f.status(fr, r.ID(), "failed", err.Error())

@@ -492,8 +492,9 @@ func (t *Transport) CreateOffer(ctx context.Context, peer transport.PeerInfo) (t
 		return transport.Description{}, protocol.NewError(protocol.CodeInternal, "webrtc: no local description after gathering")
 	}
 	l.report(protocol.PeerICEChecking, "", "")
-	l.log.Info("invite candidates", "local", candidateSummary(local.SDP))
-	return transport.Description{Kind: transport.DescriptionOffer, Data: encodeDescription(local.SDP)}, nil
+	sdp := l.withMappedCandidates(ctx, local.SDP)
+	l.log.Info("invite candidates", "local", candidateSummary(sdp))
+	return transport.Description{Kind: transport.DescriptionOffer, Data: encodeDescription(sdp)}, nil
 }
 
 // waitGathering waits for ICE candidate gathering, but not for the slowest
@@ -576,8 +577,9 @@ func (t *Transport) AcceptOffer(ctx context.Context, peer transport.PeerInfo, re
 		return transport.Description{}, protocol.NewError(protocol.CodeInternal, "webrtc: no local description after gathering")
 	}
 	l.report(protocol.PeerICEChecking, "", "")
-	l.log.Info("reply candidates", "local", candidateSummary(local.SDP), "remote", candidateSummary(offerSDP))
-	return transport.Description{Kind: transport.DescriptionAnswer, Data: encodeDescription(local.SDP)}, nil
+	sdp := l.withMappedCandidates(ctx, local.SDP)
+	l.log.Info("reply candidates", "local", candidateSummary(sdp), "remote", candidateSummary(offerSDP))
+	return transport.Description{Kind: transport.DescriptionAnswer, Data: encodeDescription(sdp)}, nil
 }
 
 // ApplyAnswer implements transport.Signalling.

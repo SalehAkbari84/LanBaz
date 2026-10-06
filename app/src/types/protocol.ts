@@ -274,6 +274,7 @@ export const EVENT = {
   daemonLog: 'daemon.log',
 
   roomCreated: 'room.created',
+  roomUpdated: 'room.updated',
   roomClosed: 'room.closed',
 
   peerJoined: 'peer.joined',
@@ -454,6 +455,8 @@ export interface DiagnoseReport {
   turn: DiagnoseServer[]
   advice: 'ok' | 'needs_turn' | 'stun_blocked' | 'turn_broken'
   duration_ms: number
+  /** UPnP/NAT-PMP on the home router: "UPnP 85.x.x.x", "disabled", or why not. */
+  port_mapping?: string
 }
 
 export interface Capabilities {

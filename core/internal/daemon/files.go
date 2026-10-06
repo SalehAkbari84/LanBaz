@@ -17,6 +17,7 @@ import (
 	"net/netip"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -88,6 +89,22 @@ type transfer struct {
 	ln     net.Listener
 	cancel context.CancelFunc
 	done   atomic.Int64
+	ended  time.Time // when it reached a final state
+}
+
+// Finished transfers kept for the UI, and how old a leftover partial download
+// may get before start-up removes it.
+const (
+	keepFinished = 30
+	partMaxAge   = 7 * 24 * time.Hour
+)
+
+func finalState(s string) bool {
+	switch s {
+	case "done", "declined", "canceled", "expired", "failed":
+		return true
+	}
+	return false
 }
 
 type fileSvc struct {
@@ -104,7 +121,9 @@ func newFileSvc(d *Daemon) *fileSvc {
 	if home, err := os.UserHomeDir(); err == nil {
 		dir = filepath.Join(home, "Downloads", "LanBaz")
 	}
-	return &fileSvc{d: d, log: d.log.With("component", "files"), dir: dir, t: map[string]*transfer{}}
+	f := &fileSvc{d: d, log: d.log.With("component", "files"), dir: dir, t: map[string]*transfer{}}
+	go f.cleanParts()
+	return f
 }
 
 func randomHex(n int) string {
@@ -125,8 +144,42 @@ func (f *fileSvc) publish(t *transfer) {
 func (f *fileSvc) setState(t *transfer, state, errMsg string) {
 	f.mu.Lock()
 	t.info.State, t.info.Error = state, errMsg
+	if finalState(state) && t.ended.IsZero() {
+		t.ended = time.Now()
+	}
+	f.pruneLocked()
 	f.mu.Unlock()
 	f.publish(t)
+}
+
+// pruneLocked forgets the oldest finished transfers beyond keepFinished.
+func (f *fileSvc) pruneLocked() {
+	var finished []*transfer
+	for _, t := range f.t {
+		if finalState(t.info.State) {
+			finished = append(finished, t)
+		}
+	}
+	if len(finished) <= keepFinished {
+		return
+	}
+	sort.Slice(finished, func(i, j int) bool { return finished[i].ended.Before(finished[j].ended) })
+	for _, t := range finished[:len(finished)-keepFinished] {
+		delete(f.t, t.info.ID)
+	}
+}
+
+// cleanParts removes partial downloads nobody resumed for a week.
+func (f *fileSvc) cleanParts() {
+	if f.dir == "" {
+		return
+	}
+	parts, _ := filepath.Glob(filepath.Join(f.dir, "*"+partSuffix))
+	for _, p := range parts {
+		if st, err := os.Stat(p); err == nil && time.Since(st.ModTime()) > partMaxAge {
+			_ = os.Remove(p)
+		}
+	}
 }
 
 func (f *fileSvc) list() []protocol.FileTransfer {

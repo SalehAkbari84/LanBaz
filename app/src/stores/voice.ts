@@ -4,8 +4,13 @@
  * relay, so no STUN, TURN or server is involved and only candidates on the
  * virtual LAN are offered. The daemon carries the signalling (voice.signal).
  *
- * Who offers: when two players are both in voice, the one with the smaller
- * peer id makes the offer, so two people joining at once never collide.
+ * Who offers: every join picks a random session id and announces it; of two
+ * players, the smaller session id makes the offer. It does not depend on the
+ * room's player list (which may not know this PC's own id yet), so two people
+ * joining at the same moment never both wait, and never both offer.
+ *
+ * Candidates travel inside the offer and answer (gathering is waited for), so
+ * nothing can arrive before the connection it belongs to.
  */
 
 import { invoke } from '@tauri-apps/api/core'
@@ -15,12 +20,11 @@ import { create } from 'zustand'
 import { isTauri } from '../services/tauri'
 import { daemonClient } from './daemon'
 import { usePrefs } from './prefs'
-import { useRoomsStore } from './rooms'
 import { toast } from './toasts'
 import { translate } from '../i18n'
 
 type Signal =
-  | { t: 'hello'; reply?: boolean }
+  | { t: 'hello'; sid?: string; reply?: boolean }
   | { t: 'bye' }
   | { t: 'offer' | 'answer'; sdp: string }
   | { t: 'ice'; c: RTCIceCandidateInit }
@@ -56,20 +60,39 @@ let unlistenPtt: (() => void) | null = null
 
 const SPEAKING_RMS = 0.04
 
-function selfId(roomId: string): string {
-  const room = useRoomsStore.getState().rooms[roomId]
-  return room?.peers?.find((p) => p.is_self)?.peer_id ?? ''
+/** This join's session id (see the comment at the top). */
+let sid = ''
+
+/** Keeps only candidates on the room's own addresses, so audio uses the tunnel. */
+function tunnelOnly(sdp: string): string {
+  return sdp
+    .split('\r\n')
+    .filter((line) => {
+      if (!line.startsWith('a=candidate:')) return true
+      const addr = line.split(' ')[4] ?? ''
+      return addr.startsWith('10.200.') || addr.endsWith('.local')
+    })
+    .join('\r\n')
+}
+
+/** Waits until every candidate is in the local description (or 3 s). */
+function gathered(pc: RTCPeerConnection): Promise<void> {
+  if (pc.iceGatheringState === 'complete') return Promise.resolve()
+  return new Promise((resolve) => {
+    const done = () => {
+      if (pc.iceGatheringState !== 'complete') return
+      pc.removeEventListener('icegatheringstatechange', done)
+      resolve()
+    }
+    pc.addEventListener('icegatheringstatechange', done)
+    setTimeout(resolve, 3000)
+  })
 }
 
 async function send(roomId: string, to: string, data: Signal): Promise<void> {
   await daemonClient()?.request('voice.signal', { room_id: roomId, to, data })
 }
 
-/** Only the room's own addresses: everything else would leave the tunnel. */
-function onTunnel(c: RTCIceCandidate): boolean {
-  const addr = c.address ?? c.candidate.split(' ')[4] ?? ''
-  return addr.startsWith('10.200.') || addr.endsWith('.local')
-}
 
 function meter(stream: MediaStream, onLevel: (speaking: boolean) => void): () => void {
   ctx ??= new AudioContext()
@@ -113,7 +136,7 @@ function closeLink(peerId: string): void {
   })
 }
 
-function link(roomId: string, peerId: string): RTCPeerConnection {
+function link(_roomId: string, peerId: string): RTCPeerConnection {
   const existing = links.get(peerId)
   if (existing) return existing.pc
   const pc = new RTCPeerConnection({ iceServers: [] })
@@ -122,9 +145,6 @@ function link(roomId: string, peerId: string): RTCPeerConnection {
   const entry: { pc: RTCPeerConnection; audio: HTMLAudioElement; meter?: () => void } = { pc, audio }
   links.set(peerId, entry)
   mic?.getTracks().forEach((t) => pc.addTrack(t, mic!))
-  pc.onicecandidate = (e) => {
-    if (e.candidate && onTunnel(e.candidate)) void send(roomId, peerId, { t: 'ice', c: e.candidate.toJSON() })
-  }
   pc.ontrack = (e) => {
     const stream = e.streams[0] ?? new MediaStream([e.track])
     audio.srcObject = stream
@@ -146,7 +166,8 @@ function link(roomId: string, peerId: string): RTCPeerConnection {
 async function offer(roomId: string, peerId: string): Promise<void> {
   const pc = link(roomId, peerId)
   await pc.setLocalDescription(await pc.createOffer())
-  await send(roomId, peerId, { t: 'offer', sdp: pc.localDescription!.sdp })
+  await gathered(pc)
+  await send(roomId, peerId, { t: 'offer', sdp: tunnelOnly(pc.localDescription!.sdp) })
 }
 
 export const useVoice = create<VoiceState>((set, get) => ({
@@ -179,7 +200,8 @@ export const useVoice = create<VoiceState>((set, get) => ({
         applyMicState()
       })
     }
-    await send(roomId, '', { t: 'hello' })
+    sid = Math.random().toString(36).slice(2) + Date.now().toString(36)
+    await send(roomId, '', { t: 'hello', sid })
   },
 
   leave: () => {
@@ -216,18 +238,22 @@ export const useVoice = create<VoiceState>((set, get) => ({
 
   onSignal: (roomId, from, data) => {
     if (get().roomId !== roomId || !from || !mic) return
-    const me = selfId(roomId)
     switch (data.t) {
       case 'hello':
-        if (me && me < from) void offer(roomId, from)
-        else if (!data.reply) void send(roomId, from, { t: 'hello', reply: true })
+        // A new join from this player: whatever was there before is stale.
+        if (!data.reply) closeLink(from)
+        if (!data.sid) break // an old version; it will offer if it should
+        if (sid < data.sid) void offer(roomId, from)
+        else if (!data.reply) void send(roomId, from, { t: 'hello', sid, reply: true })
         break
       case 'offer': {
+        closeLink(from)
         const pc = link(roomId, from)
         void (async () => {
           await pc.setRemoteDescription({ type: 'offer', sdp: data.sdp })
           await pc.setLocalDescription(await pc.createAnswer())
-          await send(roomId, from, { t: 'answer', sdp: pc.localDescription!.sdp })
+          await gathered(pc)
+          await send(roomId, from, { t: 'answer', sdp: tunnelOnly(pc.localDescription!.sdp) })
         })()
         break
       }

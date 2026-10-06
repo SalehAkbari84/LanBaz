@@ -7,7 +7,7 @@ LanBaz connects several PCs into a virtual LAN so that LAN-only games (Minecraft
 Counter-Strike, Age of Empires II, …) work across the internet without touching
 the game itself.
 
-> **Status: ready for LAN play (0.5.2).** Serverless rooms, a Wintun virtual
+> **Status: ready for LAN play (0.6.2).** Serverless rooms, a Wintun virtual
 > LAN with automatic firewall/priority setup, broadcast/multicast relay for LAN
 > discovery, direct player-to-player links, in-room chat, automatic game
 > detection, `name.local` player names, Classic LAN (L2/TAP) rooms for old

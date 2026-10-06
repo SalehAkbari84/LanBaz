@@ -252,3 +252,17 @@ fn install_tap_blocking(dir: &std::path::Path) -> Result<String, String> {
 fn install_tap_blocking(_dir: &std::path::Path) -> Result<String, String> {
     Err("Classic LAN is only available on Windows".to_string())
 }
+
+/// Restarts LanBaz: the daemon stops cleanly (rooms close, players are told,
+/// adapters are removed) and the app starts again, e.g. after a driver
+/// install. Kept networks come back by themselves.
+#[tauri::command]
+pub async fn restart_app(app: tauri::AppHandle) {
+    use tauri::Manager;
+    if let Some(supervisor) = app.try_state::<std::sync::Arc<super::supervisor::Supervisor>>() {
+        supervisor.suppress();
+    }
+    let _ = tauri::async_runtime::spawn_blocking(super::daemon::stop_blocking).await;
+    super::kill_sidecars(&app);
+    app.restart();
+}

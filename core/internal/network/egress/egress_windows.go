@@ -19,6 +19,7 @@ package egress
 import (
 	"context"
 	"net"
+	"net/netip"
 	"os"
 	"strings"
 	"sync"
@@ -165,4 +166,46 @@ func findPhysical() (int, string) {
 		return bestIdx, bestName
 	}
 	return 0, ""
+}
+
+// PhysicalGateway returns the real internet adapter's IPv4 address and its
+// default gateway (the home router), or invalid addresses when there is none.
+// A VPN holding the default route does not change the answer.
+func PhysicalGateway() (local, gateway netip.Addr) {
+	idx, _ := Physical()
+	if idx == 0 {
+		return
+	}
+	var size uint32 = 16 * 1024
+	for i := 0; i < 3; i++ {
+		buf := make([]byte, size)
+		first := (*windows.IpAdapterAddresses)(unsafe.Pointer(&buf[0]))
+		err := windows.GetAdaptersAddresses(windows.AF_INET, windows.GAA_FLAG_INCLUDE_GATEWAYS, 0, first, &size)
+		if err == windows.ERROR_BUFFER_OVERFLOW {
+			continue
+		}
+		if err != nil {
+			return
+		}
+		for a := first; a != nil; a = a.Next {
+			if int(a.IfIndex) != idx {
+				continue
+			}
+			for u := a.FirstUnicastAddress; u != nil; u = u.Next {
+				if ip, ok := netip.AddrFromSlice(u.Address.IP()); ok && ip.Unmap().Is4() {
+					local = ip.Unmap()
+					break
+				}
+			}
+			for g := a.FirstGatewayAddress; g != nil; g = g.Next {
+				if ip, ok := netip.AddrFromSlice(g.Address.IP()); ok && ip.Unmap().Is4() {
+					gateway = ip.Unmap()
+					break
+				}
+			}
+			return
+		}
+		return
+	}
+	return
 }

@@ -4,7 +4,10 @@ import { useEffect } from 'react'
 import { IncomingCode } from './components/IncomingCode'
 import { Sidebar } from './components/Sidebar'
 import { Toaster } from './components/Toaster'
-import { translate, useDocumentDirection } from './i18n'
+import { UpdateDock } from './components/UpdateDock'
+import { RequirementsPrompt } from './components/RequirementsPrompt'
+import { useOverlayVoiceListener, useTraySync, useVoiceBroadcast } from './services/bridges'
+import { useDocumentDirection } from './i18n'
 import { JoinPrompts } from './components/JoinPrompts'
 import { ChatPage } from './pages/ChatPage'
 import { FriendsPage } from './pages/FriendsPage'
@@ -16,8 +19,6 @@ import { SettingsPage } from './pages/SettingsPage'
 import { isOverlaySurface } from './services/overlay'
 import { useChatStore } from './stores/chat'
 import { useDaemonStore } from './stores/daemon'
-import { usePrefs } from './stores/prefs'
-import { toast } from './stores/toasts'
 import { useUpdates } from './stores/updates'
 
 export default function App() {
@@ -34,27 +35,13 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Updates: once shortly after start, then every 6 hours; the main window
-  // only, so the overlay does not check twice.
+  // Updates: shortly after start, then every 10 minutes; a new version is
+  // asked about on the main screen (UpdateDock). Main window only.
   useEffect(() => {
     if (overlay) return
-    const run = async () => {
-      await useUpdates.getState().refresh()
-      const found = await useUpdates.getState().check()
-      if (found)
-        toast(
-          {
-            tone: 'info',
-            title: translate(usePrefs.getState().language, 'update.available', {
-              version: found.version,
-            }),
-            body: translate(usePrefs.getState().language, 'update.availableBody'),
-          },
-          12000,
-        )
-    }
-    const first = setTimeout(() => void run(), 15000)
-    const every = setInterval(() => void run(), 6 * 3600 * 1000)
+    const run = () => void useUpdates.getState().checkAndAsk()
+    const first = setTimeout(run, 15000)
+    const every = setInterval(run, 10 * 60 * 1000)
     return () => {
       clearTimeout(first)
       clearInterval(every)
@@ -75,7 +62,12 @@ export default function App() {
   }, [page])
 
   if (overlay) {
-    return <OverlayPage />
+    return (
+      <>
+        <OverlayBridges />
+        <OverlayPage />
+      </>
+    )
   }
 
   return (
@@ -110,6 +102,20 @@ export default function App() {
       <IncomingCode />
       <JoinPrompts />
       <Toaster />
+      <UpdateDock />
+      <RequirementsPrompt />
+      <MainBridges />
     </div>
   )
+}
+
+function MainBridges() {
+  useTraySync()
+  useVoiceBroadcast()
+  return null
+}
+
+function OverlayBridges() {
+  useOverlayVoiceListener()
+  return null
 }
