@@ -1,0 +1,43 @@
+{
+  "id": "beyond-all-reason",
+  "name": "Beyond All Reason",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "spring.exe",
+      "beyond-all-reason.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      8452
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "direct"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      8452
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Run the LAN server (SPADS) or host; others join host:8452.",
+  "availability": [
+    "free"
+  ],
+  "notes": "",
+  "path_hints": [
+    "beyond"
+  ]
+}

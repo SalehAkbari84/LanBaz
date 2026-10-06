@@ -1,0 +1,39 @@
+{
+  "id": "fear",
+  "name": "F.E.A.R.",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "fear.exe",
+      "fearmp.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      27888
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      27888
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      27888
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → LAN.",
+  "notes": "LAN discovery by broadcast."
+}

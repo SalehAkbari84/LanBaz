@@ -1,0 +1,36 @@
+{
+  "id": "zandronum",
+  "name": "Doom (Zandronum)",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "zandronum.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      10666
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "none"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      10666
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host with Doomseeker or -host; others connect to host:10666.",
+  "notes": "Join by address."
+}

@@ -1,0 +1,41 @@
+{
+  "id": "cnc-generals",
+  "name": "C&C: Generals",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "generals.exe",
+      "game.dat"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      8086,
+      8088
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      8086
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      8086,
+      8088
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Network → host creates a game; others see it in the list.",
+  "notes": "Generals LAN uses UDP broadcast."
+}

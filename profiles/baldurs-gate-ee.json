@@ -1,0 +1,42 @@
+{
+  "id": "baldurs-gate-ee",
+  "name": "Baldur's Gate EE (I / II)",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "baldur.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "both",
+    "ports": [
+      47630,
+      2300
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "direct"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp",
+      "udp"
+    ],
+    "ports": [
+      47630,
+      2300
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → TCP/IP (LAN) → Create Game; others join with the host's IP.",
+  "availability": [
+    "drm_free"
+  ],
+  "notes": "GOG version; use the TCP/IP protocol, not the Beamdog lobby."
+}

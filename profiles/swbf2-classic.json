@@ -1,0 +1,38 @@
+{
+  "id": "swbf2-classic",
+  "name": "Star Wars Battlefront II (2005)",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "battlefrontii.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      3658
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      3658
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      3658
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → LAN → Host.",
+  "notes": "LAN discovery by broadcast."
+}

@@ -1,0 +1,39 @@
+{
+  "id": "quake3",
+  "name": "Quake III Arena",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "quake3.exe",
+      "ioquake3.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      27960
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      27960
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      27960
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Start Server on the host; others refresh the Local list.",
+  "notes": "LAN browsing uses broadcast on 27960."
+}

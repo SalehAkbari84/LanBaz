@@ -1,0 +1,38 @@
+{
+  "id": "cod-waw",
+  "name": "Call of Duty: World at War",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "codwawmp.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      28960
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      28960
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      28960
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Start Server; others refresh the LAN list.",
+  "notes": "LAN browsing uses broadcast on 28960."
+}

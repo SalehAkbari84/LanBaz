@@ -1,0 +1,47 @@
+{
+  "id": "aoe2",
+  "name": "Age of Empires II",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "aoe2de_s.exe",
+      "age2_x1.exe",
+      "empires2.exe",
+      "aoe2.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "both",
+    "ports": [
+      2300,
+      47624,
+      5900
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      2300,
+      47624
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp",
+      "udp"
+    ],
+    "ports": [
+      2300,
+      5900,
+      47624
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host creates a multiplayer LAN game; others see it in the LAN list.",
+  "notes": "Classic AoE2 uses DirectPlay (TCP/UDP 2300-2400, 47624) with broadcast discovery."
+}

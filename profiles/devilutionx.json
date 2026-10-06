@@ -1,0 +1,40 @@
+{
+  "id": "devilutionx",
+  "name": "DevilutionX (Diablo)",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "devilutionx.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "tcp",
+    "ports": [
+      6112
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "direct"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp"
+    ],
+    "ports": [
+      6112
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → Client-Server (TCP) → Create Game; others join host:6112.",
+  "availability": [
+    "free"
+  ],
+  "notes": "",
+  "requires": "diabdat.mpq from Diablo (GOG)."
+}

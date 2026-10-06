@@ -1,0 +1,43 @@
+{
+  "id": "unvanquished",
+  "name": "Unvanquished",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "daemon.exe",
+      "unvanquished.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      27960
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "direct"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      27960
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host a server; others /connect host:27960.",
+  "availability": [
+    "free"
+  ],
+  "notes": "",
+  "path_hints": [
+    "unvanquished"
+  ]
+}

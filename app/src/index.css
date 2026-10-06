@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-surface bg-app-gradient text-slate-200 antialiased;
+    font-family: Inter, Vazirmatn, ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
+  }
+
+  html[lang='fa'] body {
+    font-family: Vazirmatn, Inter, ui-sans-serif, system-ui, sans-serif;
+  }
+
+  /* Codes, addresses and numbers keep left-to-right order inside RTL text. */
+  .ltr {
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+
+  ::selection {
+    background: rgba(124, 92, 255, 0.45);
+  }
+
+  /* Thin, dark scrollbars that do not shout over the content. */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.18);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.32);
+    background-clip: content-box;
+    border: 3px solid transparent;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply rounded-2xl border border-white/[0.07] bg-white/[0.035] shadow-card backdrop-blur-xl;
+  }
+
+  .card {
+    @apply glass p-5;
+  }
+
+  .label {
+    @apply text-[11px] font-medium uppercase tracking-wider text-slate-500;
+  }
+
+  html[lang='fa'] .label {
+    @apply normal-case tracking-normal text-xs;
+  }
+
+  .value {
+    @apply font-mono text-sm text-slate-200;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04]
+      px-3.5 py-2 text-sm font-medium text-slate-200 transition-all
+      hover:border-accent/50 hover:bg-accent/10
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60
+      active:scale-[0.98]
+      disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-white/10 disabled:hover:bg-white/[0.04];
+  }
+
+  .btn-primary {
+    @apply border-transparent bg-accent-gradient text-white shadow-glow hover:brightness-110 hover:bg-accent-gradient;
+  }
+
+  .btn-danger {
+    @apply border-red-500/30 text-red-300 hover:border-red-400/60 hover:bg-red-500/10;
+  }
+
+  .btn-ghost {
+    @apply border-transparent bg-transparent hover:bg-white/[0.06] hover:border-transparent;
+  }
+
+  .btn-sm {
+    @apply rounded-lg px-2.5 py-1 text-xs;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-white/10 bg-surface-sunken/70 px-3.5 py-2 text-sm text-slate-100
+      placeholder:text-slate-600 transition-colors
+      focus:border-accent/70 focus:outline-none focus:ring-2 focus:ring-accent/20
+      disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 text-xs text-slate-300;
+  }
+
+  /*
+   * The overlay window floats above a game, so it must not paint a background:
+   * anything opaque here would be an opaque rectangle sitting on the match.
+   */
+  .overlay-surface {
+    background: transparent !important;
+  }
+
+  .overlay-surface #root {
+    height: 100%;
+  }
+}

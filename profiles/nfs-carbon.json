@@ -1,0 +1,41 @@
+{
+  "id": "nfs-carbon",
+  "name": "Need for Speed: Carbon",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "nfsc.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "both",
+    "ports": [
+      9999,
+      9900
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      9999
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp",
+      "udp"
+    ],
+    "ports": [
+      9900,
+      9999
+    ],
+    "scope": "private"
+  },
+  "join_hint": "LAN → host creates a race; others join.",
+  "notes": "LAN lobby discovery by broadcast."
+}

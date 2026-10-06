@@ -1,0 +1,42 @@
+{
+  "id": "stardew",
+  "name": "Stardew Valley",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "stardew valley.exe",
+      "stardewvalley.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      24642
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      24642
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      24642
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Co-op → Host; others Co-op → Join LAN game.",
+  "notes": "LAN co-op uses UDP 24642.",
+  "availability": [
+    "drm_free"
+  ]
+}

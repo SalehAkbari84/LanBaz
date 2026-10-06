@@ -1,0 +1,41 @@
+{
+  "id": "arma2",
+  "name": "ArmA 2 / Operation Arrowhead",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "arma2oa.exe",
+      "arma2.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      2302,
+      2303
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      2303
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      2302,
+      2303
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → New (LAN); others LAN filter.",
+  "notes": "LAN discovery by broadcast."
+}

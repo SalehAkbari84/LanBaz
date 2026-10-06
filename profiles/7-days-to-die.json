@@ -1,0 +1,43 @@
+{
+  "id": "7-days-to-die",
+  "name": "7 Days to Die",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "7daystodie.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "both",
+    "ports": [
+      26900,
+      26901,
+      26902
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      26900
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp",
+      "udp"
+    ],
+    "ports": [
+      26900,
+      26901,
+      26902
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host a game; others use Join → LAN or connect to host:26900.",
+  "notes": "LAN listing uses broadcast."
+}

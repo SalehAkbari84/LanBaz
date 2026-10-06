@@ -1,0 +1,40 @@
+{
+  "id": "civ4",
+  "name": "Civilization IV",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "civ4beyondsword.exe",
+      "civilization4.exe",
+      "civ4warlords.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      2056
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      2056
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      2056
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → LAN game.",
+  "notes": "LAN discovery by broadcast."
+}

@@ -1,0 +1,38 @@
+{
+  "id": "gta-sa-mp",
+  "name": "GTA San Andreas Multiplayer",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "samp.exe",
+      "gta_sa.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      7777
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "none"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      7777
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Add the host's address:7777 to SA-MP favourites.",
+  "notes": "SA-MP servers are joined by address.",
+  "join_uri": "samp://{host}:{port}"
+}

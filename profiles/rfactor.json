@@ -1,0 +1,41 @@
+{
+  "id": "rfactor",
+  "name": "rFactor",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "rfactor.exe",
+      "rfactor dedicated.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      34297,
+      34397
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      34397
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      34297,
+      34397
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host a LAN race; others LAN list.",
+  "notes": "LAN discovery by broadcast."
+}

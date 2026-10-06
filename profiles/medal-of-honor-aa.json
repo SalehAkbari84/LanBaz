@@ -1,0 +1,40 @@
+{
+  "id": "medal-of-honor-aa",
+  "name": "Medal of Honor: Allied Assault",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "mohaa.exe",
+      "moh_spearhead.exe",
+      "moh_breakthrough.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      12203
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      12203
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      12203
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Start a server; others refresh the LAN list.",
+  "notes": "LAN discovery by broadcast."
+}

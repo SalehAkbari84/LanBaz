@@ -1,0 +1,37 @@
+{
+  "id": "csgo",
+  "name": "Counter-Strike: Global Offensive (legacy)",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "csgo.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      27015
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "none"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      27015
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host with sv_lan 1; others connect to host:27015.",
+  "notes": "Join by address.",
+  "join_uri": "steam://connect/{host}:{port}"
+}

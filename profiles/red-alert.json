@@ -1,0 +1,40 @@
+{
+  "id": "red-alert",
+  "name": "C&C: Red Alert",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "ra95.exe",
+      "redalert.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      1234
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      1234
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      1234
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → Network (IPX).",
+  "notes": "IPX LAN: use a Classic LAN (L2) room.",
+  "needs_l2": true
+}

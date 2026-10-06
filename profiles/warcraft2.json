@@ -1,0 +1,39 @@
+{
+  "id": "warcraft2",
+  "name": "Warcraft II: Battle.net Edition",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "warcraft ii bne.exe",
+      "warcraft ii.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      6112
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      6112
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      6112
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → Local Area Network (UDP).",
+  "notes": "UDP LAN mode works on standard rooms; the old IPX mode needs Classic LAN."
+}

@@ -1,0 +1,40 @@
+{
+  "id": "luanti",
+  "name": "Luanti (Minetest)",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "luanti.exe",
+      "minetest.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      30000
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "direct"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      30000
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host Game with 'Host Server' ticked; others Join Game → host:30000.",
+  "availability": [
+    "free"
+  ],
+  "notes": ""
+}

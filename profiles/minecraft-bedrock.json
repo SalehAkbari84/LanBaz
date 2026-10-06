@@ -1,0 +1,40 @@
+{
+  "id": "minecraft-bedrock",
+  "name": "Minecraft (Bedrock Edition)",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "minecraft.windows.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      19132,
+      19133
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      19132
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      19132,
+      19133
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Worlds with \"Visible to LAN players\" appear in the Friends tab under LAN Games.",
+  "notes": "Bedrock discovers LAN worlds with UDP broadcast on 19132."
+}

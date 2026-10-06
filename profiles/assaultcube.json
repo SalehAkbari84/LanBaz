@@ -1,0 +1,43 @@
+{
+  "id": "assaultcube",
+  "name": "AssaultCube",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "ac_client.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      28763,
+      28764
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      28763
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      28763,
+      28764
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Run the server; others Multiplayer → Join a LAN server.",
+  "availability": [
+    "free"
+  ],
+  "notes": ""
+}

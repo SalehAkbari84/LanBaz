@@ -1,0 +1,39 @@
+{
+  "id": "wesnoth",
+  "name": "Battle for Wesnoth",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "wesnoth.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "tcp",
+    "ports": [
+      15000
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "direct"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp"
+    ],
+    "ports": [
+      15000
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → Host Networked Game; others Join → host's address.",
+  "availability": [
+    "free"
+  ],
+  "notes": ""
+}

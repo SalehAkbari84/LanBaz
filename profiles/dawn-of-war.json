@@ -1,0 +1,41 @@
+{
+  "id": "dawn-of-war",
+  "name": "Warhammer 40,000: Dawn of War",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "w40k.exe",
+      "w40kwa.exe",
+      "soulstorm.exe",
+      "darkcrusade.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      6112
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      6112
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      6112
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → LAN.",
+  "notes": "LAN games are announced by broadcast."
+}

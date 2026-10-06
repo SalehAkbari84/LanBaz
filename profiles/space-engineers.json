@@ -1,0 +1,39 @@
+{
+  "id": "space-engineers",
+  "name": "Space Engineers",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "spaceengineers.exe",
+      "spaceengineersdedicated.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      27016
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      27016
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      27016
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host a LAN world; others Join Game → LAN.",
+  "notes": "LAN discovery uses Steam LAN queries."
+}

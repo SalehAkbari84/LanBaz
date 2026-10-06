@@ -1,0 +1,36 @@
+{
+  "id": "pes6",
+  "name": "Pro Evolution Soccer 6",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "pes6.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      5739
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "none"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      5739
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Network → host creates; others connect to the host address.",
+  "notes": "Join by address."
+}

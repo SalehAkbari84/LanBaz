@@ -1,0 +1,41 @@
+{
+  "id": "diablo2",
+  "name": "Diablo II",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "game.exe",
+      "diablo ii.exe",
+      "d2r.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "tcp",
+    "ports": [
+      4000
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "none"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp"
+    ],
+    "ports": [
+      4000
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host: Open Battle.net/TCP-IP → Host Game. Others: Join Game → host address.",
+  "notes": "TCP/IP games are joined by address; use the host's 10.200.x.1 or name.local.",
+  "path_hints": [
+    "diablo"
+  ]
+}

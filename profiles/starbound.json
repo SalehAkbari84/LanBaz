@@ -1,0 +1,40 @@
+{
+  "id": "starbound",
+  "name": "Starbound",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "starbound.exe",
+      "starbound_server.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "tcp",
+    "ports": [
+      21025
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "none"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp"
+    ],
+    "ports": [
+      21025
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host a server; others Join by IP → host:21025.",
+  "notes": "Join by address.",
+  "availability": [
+    "drm_free"
+  ]
+}

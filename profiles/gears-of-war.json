@@ -1,0 +1,41 @@
+{
+  "id": "gears-of-war",
+  "name": "Gears of War (Games for Windows)",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "wargame-g4wlive.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      3074
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      3074,
+      14001
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      3074,
+      14001
+    ],
+    "scope": "private"
+  },
+  "max_lan_rtt_ms": 30,
+  "join_hint": "Everyone signs in to a GFWL offline (local) profile, then host: Multiplayer → System Link → Host; others: Multiplayer → System Link → Join. LanBaz points GFWL at its own adapter while the room is open - start the game after joining the room.",
+  "notes": "Games for Windows Live title. GFWL only sends system-link discovery on the adapter named in its ConnectionOverride setting; LanBaz sets it to the room's adapter and restores it afterwards. System link searches are broadcast on UDP 14001 (Unreal Engine 3 LAN beacon). The game rejects LAN players with a ping above about 30 ms."
+}

@@ -1,0 +1,39 @@
+{
+  "id": "warzone2100",
+  "name": "Warzone 2100",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "warzone2100.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "tcp",
+    "ports": [
+      2100
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "direct"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp"
+    ],
+    "ports": [
+      2100
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → Host Game; others Join Game → enter host IP.",
+  "availability": [
+    "free"
+  ],
+  "notes": ""
+}

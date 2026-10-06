@@ -1,0 +1,41 @@
+{
+  "id": "killing-floor-2",
+  "name": "Killing Floor 2",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "kfgame.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      7777,
+      27015
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      27015
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      7777,
+      27015
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host; others Server Browser → LAN.",
+  "notes": "LAN listing via Steam queries.",
+  "join_uri": "steam://connect/{host}:{port}"
+}

@@ -1,0 +1,40 @@
+{
+  "id": "worms-armageddon",
+  "name": "Worms Armageddon",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "wa.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "both",
+    "ports": [
+      17011
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "none"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp",
+      "udp"
+    ],
+    "ports": [
+      17011
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Network → Direct IP; host hosts, others connect to the host's address.",
+  "notes": "Direct IP games.",
+  "availability": [
+    "drm_free"
+  ]
+}

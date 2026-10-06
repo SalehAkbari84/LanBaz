@@ -1,0 +1,47 @@
+{
+  "id": "minecraft",
+  "name": "Minecraft (Java Edition)",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "javaw.exe",
+      "java.exe",
+      "minecraft.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "both",
+    "ports": [
+      25565
+    ],
+    "broadcast": false,
+    "multicast": true,
+    "discovery_ports": [
+      4445
+    ]
+  },
+  "discovery": {
+    "type": "minecraft_lan",
+    "minecraft_lan": {
+      "multicast_group": "224.0.2.60",
+      "port": 4445,
+      "payload_prefix": "[MOTD]"
+    }
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp",
+      "udp"
+    ],
+    "ports": [
+      4445,
+      25565
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host: open the world to LAN. Others: Multiplayer, the world appears under LAN; or Direct Connect to host:port shown in chat.",
+  "notes": "\"Open to LAN\" announces on multicast 224.0.2.60:4445 with TTL 1; LanBaz relays it to everyone."
+}

@@ -1,0 +1,37 @@
+{
+  "id": "titan-quest",
+  "name": "Titan Quest",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "titan quest.exe",
+      "tq.exe",
+      "tqit.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → LAN; host creates, others join.",
+  "notes": "LAN discovery uses broadcast.",
+  "availability": [
+    "drm_free"
+  ]
+}

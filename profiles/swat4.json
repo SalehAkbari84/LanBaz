@@ -1,0 +1,41 @@
+{
+  "id": "swat4",
+  "name": "SWAT 4",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "swat4.exe",
+      "swat4x.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      10480,
+      10481
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      10481
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      10480,
+      10481
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host Game (LAN); others Join → LAN.",
+  "notes": "Unreal engine LAN broadcast."
+}

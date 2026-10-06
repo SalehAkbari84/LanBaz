@@ -1,0 +1,40 @@
+{
+  "id": "openrct2",
+  "name": "OpenRCT2",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "openrct2.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "tcp",
+    "ports": [
+      11753
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "direct"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp"
+    ],
+    "ports": [
+      11753
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → Start Server; others Add Server → host:11753.",
+  "availability": [
+    "free"
+  ],
+  "notes": "",
+  "requires": "RollerCoaster Tycoon 2 data (e.g. from GOG)."
+}

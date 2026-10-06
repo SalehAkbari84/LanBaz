@@ -1,0 +1,42 @@
+{
+  "id": "battlefield-1942",
+  "name": "Battlefield 1942",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "bf1942.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      14567,
+      22000,
+      23000
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      22000
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      14567,
+      22000,
+      23000
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → Host; others LAN tab.",
+  "notes": "LAN discovery by broadcast."
+}

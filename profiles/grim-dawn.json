@@ -1,0 +1,41 @@
+{
+  "id": "grim-dawn",
+  "name": "Grim Dawn",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "grim dawn.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      27015
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      27015
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      27015
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host a game (LAN); others find it in the LAN list.",
+  "notes": "LAN listing uses broadcast.",
+  "availability": [
+    "drm_free"
+  ]
+}

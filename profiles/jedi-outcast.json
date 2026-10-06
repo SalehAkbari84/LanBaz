@@ -1,0 +1,38 @@
+{
+  "id": "jedi-outcast",
+  "name": "Star Wars Jedi Knight II: Jedi Outcast",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "jk2mp.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      28070
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      28070
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      28070
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Create Game; others Join Game → LAN.",
+  "notes": "Quake 3 engine LAN broadcast."
+}

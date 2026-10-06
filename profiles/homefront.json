@@ -1,0 +1,40 @@
+{
+  "id": "homefront",
+  "name": "Homefront",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "homefront.exe",
+      "hfserver.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      27015,
+      7777
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "none"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      7777,
+      27015
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Run the Homefront dedicated server tool; others connect to host:27015.",
+  "notes": "The official online services are gone; play only works with a self-run server joined by address.",
+  "join_uri": "steam://connect/{host}:{port}"
+}

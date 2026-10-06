@@ -1,0 +1,43 @@
+{
+  "id": "dungeon-siege",
+  "name": "Dungeon Siege",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "dungeonsiege.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "both",
+    "ports": [
+      2300,
+      6073,
+      47624
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      47624
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp",
+      "udp"
+    ],
+    "ports": [
+      2300,
+      6073,
+      47624
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → Network (TCP/IP).",
+  "notes": "DirectPlay based."
+}

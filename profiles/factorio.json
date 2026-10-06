@@ -1,0 +1,41 @@
+{
+  "id": "factorio",
+  "name": "Factorio",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "factorio.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      34197
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      34197
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      34197
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → Host; others Browse LAN games.",
+  "notes": "LAN discovery uses broadcast on 34197.",
+  "availability": [
+    "drm_free"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "id": "nfs-most-wanted",
+  "name": "Need for Speed: Most Wanted (2005)",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "speed.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "both",
+    "ports": [
+      9999,
+      9900
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      9999
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp",
+      "udp"
+    ],
+    "ports": [
+      9900,
+      9999
+    ],
+    "scope": "private"
+  },
+  "join_hint": "LAN → host creates a race; others join from the LAN list.",
+  "notes": "LAN lobby discovery uses UDP 9999."
+}

@@ -1,0 +1,45 @@
+{
+  "id": "cnc-generals-zh",
+  "name": "C&C: Generals – Zero Hour",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "generals.exe",
+      "game.dat"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      8086,
+      8088
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      8086
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      8086,
+      8088
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Network → host creates a game; others see it in the list. Everyone needs the same patch (1.04).",
+  "notes": "Zero Hour LAN uses UDP broadcast on 8086; LanBaz relays it.",
+  "path_hints": [
+    "zero hour",
+    "zerohour"
+  ]
+}

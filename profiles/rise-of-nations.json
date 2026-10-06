@@ -1,0 +1,40 @@
+{
+  "id": "rise-of-nations",
+  "name": "Rise of Nations",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "rise.exe",
+      "riseofnations.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "both",
+    "ports": [
+      34987
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      34987
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp",
+      "udp"
+    ],
+    "ports": [
+      34987
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → LAN.",
+  "notes": "LAN games are announced by broadcast."
+}

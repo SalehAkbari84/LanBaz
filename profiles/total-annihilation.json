@@ -1,0 +1,44 @@
+{
+  "id": "total-annihilation",
+  "name": "Total Annihilation",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "totala.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "both",
+    "ports": [
+      2300,
+      47624
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      47624
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp",
+      "udp"
+    ],
+    "ports": [
+      2300,
+      47624
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → TCP/IP.",
+  "notes": "DirectPlay LAN.",
+  "availability": [
+    "drm_free"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "id": "ut2004",
+  "name": "Unreal Tournament 2004",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "ut2004.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      7777,
+      7778
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      7778
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      7777,
+      7778
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host Game; others Join → LAN.",
+  "notes": "LAN queries are broadcast to 7778."
+}

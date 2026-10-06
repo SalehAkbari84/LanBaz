@@ -1,0 +1,39 @@
+{
+  "id": "crysis",
+  "name": "Crysis / Crysis Wars",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "crysis.exe",
+      "crysiswars.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      64087
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      64087
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      64087
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → LAN.",
+  "notes": "LAN discovery by broadcast."
+}

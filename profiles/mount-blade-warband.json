@@ -1,0 +1,39 @@
+{
+  "id": "mount-blade-warband",
+  "name": "Mount & Blade: Warband",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "mb_warband.exe",
+      "mb_warband_dedicated.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      7240
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      7240
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      7240
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → Host; others see it in the server list with LAN filter.",
+  "notes": "LAN servers are found by broadcast."
+}

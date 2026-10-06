@@ -1,0 +1,41 @@
+{
+  "id": "halo-ce",
+  "name": "Halo: Combat Evolved",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "halo.exe",
+      "haloce.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      2302,
+      2303
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      2302
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      2302,
+      2303
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host a LAN game; others Join LAN.",
+  "notes": "LAN discovery uses broadcast on 2302."
+}

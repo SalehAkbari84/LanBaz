@@ -1,0 +1,42 @@
+{
+  "id": "assetto-corsa",
+  "name": "Assetto Corsa",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "acs.exe",
+      "acserver.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "both",
+    "ports": [
+      9600,
+      8081
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      9600
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp",
+      "udp"
+    ],
+    "ports": [
+      8081,
+      9600
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Run acServer; others join from the LAN tab of Content Manager.",
+  "notes": "LAN listing by broadcast."
+}

@@ -1,0 +1,29 @@
+# Build artefacts
+/bin/
+/dist/
+/app/dist/
+/app/src-tauri/target/
+/app/src-tauri/binaries/
+/app/src-tauri/gen/
+coverage.out
+*.test
+
+# Go
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Node
+node_modules/
+.npm/
+*.tsbuildinfo
+
+# Editors
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Local tooling (the portable Go toolchain used when the host has none)
+.tools/

@@ -1,0 +1,42 @@
+{
+  "id": "neverwinter-nights",
+  "name": "Neverwinter Nights",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "nwmain.exe",
+      "nwserver.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      5121
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      5121
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      5121
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → New; others Join LAN Game.",
+  "notes": "LAN discovery by broadcast on 5121.",
+  "availability": [
+    "drm_free"
+  ]
+}

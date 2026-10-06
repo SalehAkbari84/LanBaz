@@ -1,0 +1,39 @@
+{
+  "id": "quake2",
+  "name": "Quake II",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "quake2.exe",
+      "yquake2.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      27910
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      27910
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      27910
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Start Network Server; others Join Network Server.",
+  "notes": "LAN browsing uses broadcast on 27910."
+}

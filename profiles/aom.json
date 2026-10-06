@@ -1,0 +1,43 @@
+{
+  "id": "aom",
+  "name": "Age of Mythology",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "aom.exe",
+      "aomx.exe",
+      "aomrt_s.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "both",
+    "ports": [
+      2300,
+      47624
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      2300
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp",
+      "udp"
+    ],
+    "ports": [
+      2300,
+      47624
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → LAN.",
+  "notes": "LAN discovery by broadcast."
+}

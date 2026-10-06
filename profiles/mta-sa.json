@@ -1,0 +1,41 @@
+{
+  "id": "mta-sa",
+  "name": "Multi Theft Auto: San Andreas",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "multi theft auto.exe",
+      "mta server.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      22003,
+      22126
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      22126
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      22003,
+      22126
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Start a local server; others Server Browser → LAN.",
+  "notes": "LAN discovery by broadcast."
+}

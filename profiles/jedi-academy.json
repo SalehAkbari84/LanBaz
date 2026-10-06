@@ -1,0 +1,39 @@
+{
+  "id": "jedi-academy",
+  "name": "Star Wars Jedi Knight: Jedi Academy",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "jamp.exe",
+      "openjk.x86_64.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      29070
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      29070
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      29070
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Create Game; others Join Game → LAN.",
+  "notes": "Quake 3 engine LAN broadcast."
+}

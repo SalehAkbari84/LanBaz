@@ -1,0 +1,41 @@
+{
+  "id": "cnc3",
+  "name": "C&C 3: Tiberium Wars",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "cnc3.exe",
+      "cnc3game.dat"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      8086,
+      8088
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      8086
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      8086,
+      8088
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Network → LAN; host creates, others join.",
+  "notes": "LAN discovery by broadcast."
+}

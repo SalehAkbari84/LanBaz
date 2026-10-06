@@ -1,0 +1,40 @@
+{
+  "id": "red-alert2",
+  "name": "C&C: Red Alert 2 / Yuri's Revenge",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "ra2.exe",
+      "gamemd.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      1234
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      1234
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      1234
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Network (IPX) on every machine.",
+  "notes": "The original LAN mode is IPX: use a Classic LAN (L2) room.",
+  "needs_l2": true
+}

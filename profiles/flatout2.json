@@ -1,0 +1,38 @@
+{
+  "id": "flatout2",
+  "name": "FlatOut 2",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "flatout2.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      23756
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      23756
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      23756
+    ],
+    "scope": "private"
+  },
+  "join_hint": "LAN → Create; others LAN list.",
+  "notes": "LAN discovery by broadcast."
+}

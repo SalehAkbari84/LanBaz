@@ -1,0 +1,39 @@
+{
+  "id": "satisfactory",
+  "name": "Satisfactory",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "factorygame-win64-shipping.exe",
+      "factoryserver.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      7777,
+      15777
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "none"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      7777,
+      15777
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Run a dedicated server or session; others join host:7777.",
+  "notes": "Join by address."
+}

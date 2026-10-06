@@ -1,0 +1,42 @@
+{
+  "id": "mindustry",
+  "name": "Mindustry",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "mindustry.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "both",
+    "ports": [
+      6567
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      6567
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp",
+      "udp"
+    ],
+    "ports": [
+      6567
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host Multiplayer Game; others see it in Join Game (LAN).",
+  "availability": [
+    "free"
+  ],
+  "notes": "Free on GitHub/itch.io."
+}

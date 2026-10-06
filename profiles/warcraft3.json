@@ -1,0 +1,41 @@
+{
+  "id": "warcraft3",
+  "name": "Warcraft III",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "war3.exe",
+      "warcraft iii.exe",
+      "frozen throne.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "both",
+    "ports": [
+      6112
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      6112
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp",
+      "udp"
+    ],
+    "ports": [
+      6112
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Local Area Network on every machine; the host creates the game.",
+  "notes": "LAN games are announced with UDP broadcast on 6112."
+}

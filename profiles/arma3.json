@@ -1,0 +1,43 @@
+{
+  "id": "arma3",
+  "name": "Arma 3",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "arma3.exe",
+      "arma3_x64.exe",
+      "arma3server_x64.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      2302,
+      2303
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      2303
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      2302,
+      2303
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Server Browser → Host (LAN); others LAN tab.",
+  "notes": "LAN discovery by broadcast.",
+  "join_uri": "steam://connect/{host}:{port}"
+}

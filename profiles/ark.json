@@ -1,0 +1,44 @@
+{
+  "id": "ark",
+  "name": "ARK: Survival Evolved",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "shootergame.exe",
+      "shootergameserver.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      7777,
+      7778,
+      27015
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      27015
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      7777,
+      7778,
+      27015
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host a non-dedicated session; others find it in the LAN list or join host:7777.",
+  "notes": "LAN servers answer Steam queries on 27015.",
+  "join_uri": "steam://connect/{host}:{port}"
+}

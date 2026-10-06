@@ -1,0 +1,43 @@
+{
+  "id": "cs-source",
+  "name": "Counter-Strike: Source",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "cstrike_win64.exe",
+      "hl2.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      27015
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      27015
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      27015
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Create Server on the host; others use the LAN tab or join directly.",
+  "notes": "Source engine LAN browsing uses broadcast on UDP 27015.",
+  "join_uri": "steam://connect/{host}:{port}",
+  "path_hints": [
+    "counter-strike source"
+  ]
+}

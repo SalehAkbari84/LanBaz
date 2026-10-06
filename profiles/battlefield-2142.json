@@ -1,0 +1,40 @@
+{
+  "id": "battlefield-2142",
+  "name": "Battlefield 2142",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "bf2142.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      17567,
+      29900
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      17567
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      17567,
+      29900
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Run a local server; others Multiplayer → LAN.",
+  "notes": "LAN discovery by broadcast."
+}

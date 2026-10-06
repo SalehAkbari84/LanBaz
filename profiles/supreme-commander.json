@@ -1,0 +1,40 @@
+{
+  "id": "supreme-commander",
+  "name": "Supreme Commander",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "supremecommander.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      15000,
+      6112
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      15000
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      6112,
+      15000
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → LAN.",
+  "notes": "LAN discovery by broadcast."
+}

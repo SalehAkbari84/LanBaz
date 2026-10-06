@@ -1,0 +1,42 @@
+{
+  "id": "openttd",
+  "name": "OpenTTD",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "openttd.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "both",
+    "ports": [
+      3979
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      3979
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp",
+      "udp"
+    ],
+    "ports": [
+      3979
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → Start Server; others see it under LAN or Add Server → host:3979.",
+  "availability": [
+    "free"
+  ],
+  "notes": ""
+}

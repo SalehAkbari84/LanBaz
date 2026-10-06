@@ -1,0 +1,40 @@
+{
+  "id": "unreal-tournament",
+  "name": "Unreal Tournament (1999)",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "unrealtournament.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      7777,
+      7778
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      7778
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      7777,
+      7778
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Start Server; others Find LAN Games.",
+  "notes": "LAN queries are broadcast to 7778."
+}

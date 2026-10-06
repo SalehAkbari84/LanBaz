@@ -1,0 +1,45 @@
+{
+  "id": "cnc-tiberian-sun",
+  "name": "C&C: Tiberian Sun",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "game.exe",
+      "sun.exe",
+      "tibsun.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      1234
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      1234
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      1234
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Internet/Network → LAN (IPX).",
+  "notes": "The original LAN mode is IPX: use a Classic LAN (L2) room.",
+  "needs_l2": true,
+  "path_hints": [
+    "tiberian sun",
+    "tibsun"
+  ]
+}

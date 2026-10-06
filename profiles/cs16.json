@@ -1,0 +1,40 @@
+{
+  "id": "cs16",
+  "name": "Counter-Strike 1.6",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "hl.exe",
+      "cstrike.exe",
+      "cs.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      27015
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      27015
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      27015
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Create Server on the host; others open Find Servers → LAN.",
+  "notes": "GoldSrc LAN browsing uses broadcast A2S queries on UDP 27015."
+}

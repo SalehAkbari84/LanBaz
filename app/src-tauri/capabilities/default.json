@@ -1,0 +1,23 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Permissions for the LanBaz main window and the in-game overlay: core window and event APIs only. The daemon sidecar is spawned by Rust, not by the webview, so no shell permission is granted; all control API traffic goes through the local WebSocket the daemon authenticates.",
+  "windows": [
+    "main",
+    "overlay"
+  ],
+  "permissions": [
+    "core:default",
+    "core:window:allow-show",
+    "core:window:allow-hide",
+    "core:window:allow-close",
+    "core:window:allow-minimize",
+    "core:window:allow-unminimize",
+    "core:window:allow-set-focus",
+    "core:window:allow-start-dragging",
+    "core:window:allow-set-position",
+    "core:window:allow-set-always-on-top",
+    "core:window:allow-set-ignore-cursor-events",
+    "core:webview:allow-webview-close"
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "id": "openra",
+  "name": "OpenRA (Red Alert / Tiberian Dawn / Dune 2000)",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "openra.exe",
+      "redalert.exe",
+      "tiberiandawn.exe",
+      "dune2000.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "tcp",
+    "ports": [
+      1234
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "direct"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp"
+    ],
+    "ports": [
+      1234
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → Create Server; others Direct Connect → host:1234.",
+  "availability": [
+    "free"
+  ],
+  "notes": "Free remake; the server browser does not list LAN games, use Direct Connect.",
+  "path_hints": [
+    "openra"
+  ]
+}

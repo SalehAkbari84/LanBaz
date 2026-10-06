@@ -1,0 +1,40 @@
+{
+  "id": "among-us",
+  "name": "Among Us",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "among us.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      22023,
+      47777
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      47777
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      22023,
+      47777
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Local → Create Game on the host; others Local → the game appears.",
+  "notes": "Local games are announced with UDP broadcast on 47777."
+}

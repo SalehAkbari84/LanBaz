@@ -1,0 +1,42 @@
+{
+  "id": "half-life2-dm",
+  "name": "Half-Life 2: Deathmatch",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "hl2.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      27015
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      27015
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      27015
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Create Server; others use the LAN tab.",
+  "notes": "Source engine LAN broadcast.",
+  "join_uri": "steam://connect/{host}:{port}",
+  "path_hints": [
+    "half-life 2 deathmatch"
+  ]
+}

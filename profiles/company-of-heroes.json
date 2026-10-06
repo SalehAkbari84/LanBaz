@@ -1,0 +1,40 @@
+{
+  "id": "company-of-heroes",
+  "name": "Company of Heroes",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "reliccoh.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      6112,
+      30260
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      6112
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      6112,
+      30260
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → LAN.",
+  "notes": "LAN games are announced by broadcast."
+}

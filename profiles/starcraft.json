@@ -1,0 +1,40 @@
+{
+  "id": "starcraft",
+  "name": "StarCraft",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "starcraft.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      6111,
+      6112
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      6111
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      6111,
+      6112
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → Local Area Network (UDP).",
+  "notes": "Use the UDP LAN mode; the old IPX mode needs Classic LAN (L2)."
+}

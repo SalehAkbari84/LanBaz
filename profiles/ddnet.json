@@ -1,0 +1,42 @@
+{
+  "id": "ddnet",
+  "name": "DDNet / Teeworlds",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "ddnet.exe",
+      "teeworlds.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      8303
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      8303
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      8303
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Start the server (DDNet-Server / teeworlds_srv); others use the LAN tab or host:8303.",
+  "availability": [
+    "free"
+  ],
+  "notes": ""
+}

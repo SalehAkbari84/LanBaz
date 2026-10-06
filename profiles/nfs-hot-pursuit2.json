@@ -1,0 +1,33 @@
+{
+  "id": "nfs-hot-pursuit2",
+  "name": "Need for Speed: Hot Pursuit 2",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "nfshp2.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "both",
+    "ports": [],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp",
+      "udp"
+    ],
+    "ports": [],
+    "scope": "private"
+  },
+  "join_hint": "LAN → host creates; others join.",
+  "notes": "LAN lobby discovery by broadcast."
+}

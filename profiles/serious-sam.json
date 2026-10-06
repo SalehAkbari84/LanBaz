@@ -1,0 +1,45 @@
+{
+  "id": "serious-sam",
+  "name": "Serious Sam (Classic / 2 / 3)",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "serioussam.exe",
+      "sam2.exe",
+      "sam3.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      25600,
+      25601
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      25601
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      25600,
+      25601
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Network → Start Server; others LAN list.",
+  "notes": "LAN discovery by broadcast.",
+  "availability": [
+    "drm_free"
+  ]
+}

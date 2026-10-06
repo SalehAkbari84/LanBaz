@@ -1,0 +1,40 @@
+{
+  "id": "ut3",
+  "name": "Unreal Tournament 3",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "ut3.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      7777,
+      14001
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      14001
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      7777,
+      14001
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host Game → LAN; others Join → LAN.",
+  "notes": "LAN discovery by broadcast."
+}

@@ -1,0 +1,38 @@
+{
+  "id": "quake4",
+  "name": "Quake 4",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "quake4.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      28004
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      28004
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      28004
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Create Server; others LAN list.",
+  "notes": "LAN discovery by broadcast."
+}

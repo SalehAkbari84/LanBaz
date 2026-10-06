@@ -1,0 +1,42 @@
+{
+  "id": "cs-condition-zero",
+  "name": "Counter-Strike: Condition Zero",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "czero.exe",
+      "hl.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      27015
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      27015
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      27015
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Create Server; others Find Servers → LAN.",
+  "notes": "GoldSrc LAN broadcast on 27015.",
+  "path_hints": [
+    "condition zero"
+  ]
+}

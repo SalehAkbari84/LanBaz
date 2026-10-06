@@ -1,0 +1,39 @@
+{
+  "id": "left4dead2",
+  "name": "Left 4 Dead 2",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "left4dead2.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      27015
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      27015
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      27015
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host a LAN game from the lobby; others find it under LAN.",
+  "notes": "Source engine; set sv_lan 1 on the host if the game insists on online lobbies.",
+  "join_uri": "steam://connect/{host}:{port}"
+}

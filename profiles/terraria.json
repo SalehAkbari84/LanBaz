@@ -1,0 +1,40 @@
+{
+  "id": "terraria",
+  "name": "Terraria",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "terraria.exe",
+      "terrariaserver.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "tcp",
+    "ports": [
+      7777
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "none"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp"
+    ],
+    "ports": [
+      7777
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host & Play on the host; others Join via IP → host address, port 7777.",
+  "notes": "Terraria has no LAN list; join by address.",
+  "availability": [
+    "drm_free"
+  ]
+}

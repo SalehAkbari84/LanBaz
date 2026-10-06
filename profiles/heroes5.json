@@ -1,0 +1,32 @@
+{
+  "id": "heroes5",
+  "name": "Heroes of Might and Magic V",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "h5_game.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → LAN.",
+  "notes": "LAN discovery by broadcast."
+}

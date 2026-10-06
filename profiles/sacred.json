@@ -1,0 +1,40 @@
+{
+  "id": "sacred",
+  "name": "Sacred / Sacred Gold",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "sacred.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      2005,
+      2006
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      2005
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      2005,
+      2006
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → LAN.",
+  "notes": "LAN discovery uses broadcast."
+}

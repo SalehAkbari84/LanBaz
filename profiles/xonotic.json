@@ -1,0 +1,42 @@
+{
+  "id": "xonotic",
+  "name": "Xonotic",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "xonotic.exe",
+      "xonotic-sdl.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      26000
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      26000
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      26000
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → Create; others see it in the server list or connect to host:26000.",
+  "availability": [
+    "free"
+  ],
+  "notes": ""
+}

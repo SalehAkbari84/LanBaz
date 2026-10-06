@@ -1,0 +1,38 @@
+{
+  "id": "cod4",
+  "name": "Call of Duty 4: Modern Warfare",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "iw3mp.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      28960
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      28960
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      28960
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Start New Server on the host; others refresh the LAN list.",
+  "notes": "LAN browsing uses broadcast on 28960."
+}

@@ -1,0 +1,43 @@
+{
+  "id": "supertuxkart",
+  "name": "SuperTuxKart",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "supertuxkart.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      2759,
+      2757
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      2757
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      2759,
+      2757
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Online → Local Network → Create Server; others see it under Local Network.",
+  "availability": [
+    "free"
+  ],
+  "notes": ""
+}

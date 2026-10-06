@@ -1,0 +1,38 @@
+{
+  "id": "doom3",
+  "name": "Doom 3",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "doom3.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      27666
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      27666
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      27666
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → Create Server; others LAN.",
+  "notes": "LAN discovery by broadcast."
+}

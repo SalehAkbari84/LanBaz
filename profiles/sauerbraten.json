@@ -1,0 +1,45 @@
+{
+  "id": "sauerbraten",
+  "name": "Cube 2: Sauerbraten",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "sauerbraten.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      28785,
+      28786,
+      28784
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      28784
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      28785,
+      28786,
+      28784
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Start a server; others find it in the server browser (LAN) or /connect host.",
+  "availability": [
+    "free"
+  ],
+  "notes": ""
+}

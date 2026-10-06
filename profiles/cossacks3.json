@@ -1,0 +1,32 @@
+{
+  "id": "cossacks3",
+  "name": "Cossacks 3",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "cossacks3.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → LAN.",
+  "notes": "LAN discovery by broadcast."
+}

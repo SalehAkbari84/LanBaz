@@ -1,0 +1,42 @@
+{
+  "id": "freeciv",
+  "name": "Freeciv",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "freeciv-qt.exe",
+      "freeciv-gtk3.22.exe",
+      "freeciv-sdl2.exe",
+      "freeciv-server.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "tcp",
+    "ports": [
+      5556
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "direct"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp"
+    ],
+    "ports": [
+      5556
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Start New Game on the host; others Connect to Network Game → host:5556.",
+  "availability": [
+    "free"
+  ],
+  "notes": ""
+}

@@ -1,0 +1,36 @@
+{
+  "id": "risk-of-rain",
+  "name": "Risk of Rain",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "risk of rain.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "tcp",
+    "ports": [
+      11100
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "none"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp"
+    ],
+    "ports": [
+      11100
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Host: Multiplayer → Host. Others: Join → host address, port 11100.",
+  "notes": "Join by address."
+}

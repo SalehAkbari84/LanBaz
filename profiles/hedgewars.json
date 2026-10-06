@@ -1,0 +1,41 @@
+{
+  "id": "hedgewars",
+  "name": "Hedgewars",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "hedgewars.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "tcp",
+    "ports": [
+      46631
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      46631
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "tcp"
+    ],
+    "ports": [
+      46631
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Network game → host a local server; others connect to host:46631.",
+  "availability": [
+    "free"
+  ],
+  "notes": ""
+}

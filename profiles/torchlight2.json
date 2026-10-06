@@ -1,0 +1,41 @@
+{
+  "id": "torchlight2",
+  "name": "Torchlight II",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "torchlight2.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      4549
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      4549
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      4549
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → LAN; host creates, others join.",
+  "notes": "LAN games are announced by broadcast.",
+  "availability": [
+    "drm_free"
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "LanBaz",
+  "version": "0.5.2",
+  "identifier": "dev.lanbaz.desktop",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [
+      {
+        "label": "main",
+        "title": "LanBaz",
+        "width": 1024,
+        "height": 720,
+        "minWidth": 720,
+        "minHeight": 520,
+        "resizable": true,
+        "center": true,
+        "visible": true
+      },
+      {
+        "label": "overlay",
+        "title": "LanBaz Overlay",
+        "url": "index.html",
+        "width": 360,
+        "height": 560,
+        "resizable": false,
+        "decorations": false,
+        "transparent": true,
+        "shadow": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "visible": false,
+        "focus": false,
+        "dragDropEnabled": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost ws://127.0.0.1:* ws://localhost:*"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "nsis"
+    ],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/icon.ico"
+    ],
+    "externalBin": [
+      "binaries/lanbazd"
+    ],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      },
+      "nsis": {
+        "installMode": "perMachine",
+        "languages": [
+          "English"
+        ],
+        "displayLanguageSelector": false
+      }
+    },
+    "resources": {
+      "binaries/wintun.dll": "wintun.dll",
+      "binaries/wintun-LICENSE.txt": "wintun-LICENSE.txt",
+      "binaries/tap/OemVista.inf": "tap/OemVista.inf",
+      "binaries/tap/tap0901.cat": "tap/tap0901.cat",
+      "binaries/tap/tap0901.sys": "tap/tap0901.sys",
+      "binaries/tap/devcon.exe": "tap/devcon.exe"
+    },
+    "publisher": "LanBaz contributors",
+    "shortDescription": "LAN gaming over the internet"
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IERDRUYwODM4Qzk1NjNDRkUKUldUK1BGYkpPQWp2M0VYS25uS21PQjc4U1R3eDhkbVQrcjJ4NURPdFVJNUM2QVYwWVljRkJqMzkK",
+      "endpoints": [],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "id": "0ad",
+  "name": "0 A.D.",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "pyrogenesis.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      20595
+    ],
+    "broadcast": false,
+    "multicast": false,
+    "discovery_ports": []
+  },
+  "discovery": {
+    "type": "direct"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      20595
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → Host Game; others Join Game → host's address.",
+  "availability": [
+    "free"
+  ],
+  "notes": ""
+}

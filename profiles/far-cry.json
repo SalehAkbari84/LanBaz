@@ -1,0 +1,38 @@
+{
+  "id": "far-cry",
+  "name": "Far Cry",
+  "version": 1,
+  "executables": {
+    "windows": [
+      "farcry.exe"
+    ],
+    "linux": [],
+    "macos": []
+  },
+  "network": {
+    "protocol": "udp",
+    "ports": [
+      49001
+    ],
+    "broadcast": true,
+    "multicast": false,
+    "discovery_ports": [
+      49001
+    ]
+  },
+  "discovery": {
+    "type": "broadcast"
+  },
+  "firewall": {
+    "required": true,
+    "protocols": [
+      "udp"
+    ],
+    "ports": [
+      49001
+    ],
+    "scope": "private"
+  },
+  "join_hint": "Multiplayer → Create Server; others LAN list.",
+  "notes": "LAN discovery by broadcast."
+}
