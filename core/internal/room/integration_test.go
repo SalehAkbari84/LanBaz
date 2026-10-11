@@ -348,6 +348,24 @@ func TestServerlessPairingConnectsAndMeasures(t *testing.T) {
 	case <-time.After(10 * time.Second):
 		t.Fatal("the voice signal never reached the host")
 	}
+	// Screen-share signalling travels the same way, under its own kind.
+	gotScreen := make(chan protocol.VoiceSignal, 1)
+	hostRoom.SetSignalHandler(func(kind string, v protocol.VoiceSignal) {
+		if kind == room.SignalScreen {
+			gotScreen <- v
+		}
+	})
+	if err := guestRoom.SendSignal(room.SignalScreen, "", json.RawMessage(`{"t":"share"}`)); err != nil {
+		t.Fatalf("screen signal: %v", err)
+	}
+	select {
+	case v := <-gotScreen:
+		if string(v.Data) != `{"t":"share"}` {
+			t.Fatalf("screen signal arrived as %+v", v)
+		}
+	case <-time.After(10 * time.Second):
+		t.Fatal("the screen signal never reached the host")
+	}
 	if err := guestRoom.SendVoice("", json.RawMessage(`not json`)); err == nil {
 		t.Error("a malformed voice signal was accepted")
 	}

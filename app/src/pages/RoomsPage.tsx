@@ -32,6 +32,7 @@ import { GameFirewallBanner } from '../components/GameFirewallBanner'
 import { Avatar, Banner, Card, CopyButton, EmptyState, PageHeader, PingBadge, SectionTitle, Segmented, Sparkline, StateDot, useNow, writeClipboard } from '../components/ui'
 import { TapDriverNotice } from '../components/TapDriverNotice'
 import { VoicePanel } from '../components/VoicePanel'
+import { ScreenPanel } from '../components/ScreenPanel'
 import { FilesPanel, useFileDrop } from '../components/FilesPanel'
 import { useNumber, useT } from '../i18n'
 import { readClipboardText, saveInviteFile } from '../services/tauri'
@@ -386,6 +387,7 @@ function RoomCard({ room, network, busy }: { room: RoomSummary; network: Network
 
       <GameLimitBanner room={room} />
       <VoicePanel room={room} />
+      <ScreenPanel room={room} />
       <FilesPanel room={room} />
       {room.is_host ? <FriendInvites room={room} /> : null}
       {room.is_host && pairingCode ? (
@@ -657,7 +659,7 @@ function PlayerRow({ room, peer, busy }: { room: RoomSummary; peer: PeerSummary;
             type="button"
             className="btn btn-ghost btn-sm"
             onClick={() => void pingPeer(room.room_id, id)}
-            disabled={measuring || !isUsable(peer.state)}
+            disabled={measuring || !isUsable(peer.state) || peer.link_kind === 'hub'}
             title={t('rooms.ping')}
           >
             <Link2 size={14} className={measuring ? 'animate-pulse' : ''} />

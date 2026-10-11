@@ -65,6 +65,8 @@ type VoiceSignal struct {
 	From   PeerID          `json:"from,omitempty"`
 	To     PeerID          `json:"to,omitempty"`
 	Data   json.RawMessage `json:"data"`
+	// Kind is "voice" (default) or "screen" when sent through voice.signal.
+	Kind string `json:"kind,omitempty"`
 }
 
 // File transfer methods and events.

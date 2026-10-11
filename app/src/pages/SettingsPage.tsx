@@ -1,4 +1,4 @@
-import { Globe, Info, Mic, MonitorUp, Network, Plus, Save, Trash2, User } from 'lucide-react'
+import { Globe, Info, MonitorUp, Network, Plus, Save, Trash2, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { Banner, Card, PageHeader, Row, Segmented, SectionTitle, Switch } from '../components/ui'
@@ -7,15 +7,16 @@ import { onHotkeyError, overlayStatus, showOverlay } from '../services/overlay'
 import { autostartIsEnabled, daemonStateDir, isTauri, setAutostart } from '../services/tauri'
 import { useDaemonStore } from '../stores/daemon'
 import { usePrefs, type Corner, type Language } from '../stores/prefs'
-import { applyVoicePrefs } from '../stores/voice'
 import type { RelayServer, Settings } from '../types/protocol'
 import { AdvancedNetwork } from './settings/AdvancedNetwork'
+import { AudioSettings } from './settings/AudioSettings'
 import { DeveloperLog } from './settings/DeveloperLog'
 import { SmartRelay } from './settings/SmartRelay'
+import { FriendRelay } from './settings/FriendRelay'
 import { ConnectionCheck } from './settings/ConnectionCheck'
 import { Updates } from './settings/Updates'
 
-type Tab = 'general' | 'network' | 'overlay' | 'developer' | 'about'
+type Tab = 'general' | 'audio' | 'network' | 'overlay' | 'developer' | 'about'
 
 export function SettingsPage() {
   const t = useT()
@@ -28,13 +29,14 @@ export function SettingsPage() {
         onChange={setTab}
         options={[
           { value: 'general', label: t('settings.tab.general') },
+          { value: 'audio', label: t('settings.tab.audio') },
           { value: 'network', label: t('settings.tab.network') },
           { value: 'overlay', label: t('settings.tab.overlay') },
           { value: 'developer', label: t('settings.tab.developer') },
           { value: 'about', label: t('settings.tab.about') },
         ]}
       />
-      {tab === 'general' ? <General /> : tab === 'network' ? <NetworkTab /> : tab === 'overlay' ? <OverlayTab /> : tab === 'developer' ? <DeveloperLog /> : <About />}
+      {tab === 'general' ? <General /> : tab === 'audio' ? <AudioSettings /> : tab === 'network' ? <NetworkTab /> : tab === 'overlay' ? <OverlayTab /> : tab === 'developer' ? <DeveloperLog /> : <About />}
     </>
   )
 }
@@ -186,6 +188,7 @@ function NetworkTab() {
       </Card>
 
       <SmartRelay draft={draft} setDraft={setDraft} disabled={disabled} />
+      <FriendRelay draft={draft} setDraft={setDraft} disabled={disabled} />
 
       <Card>
         <SectionTitle icon={<Network size={16} />}>{t('settings.turn')}</SectionTitle>
@@ -293,59 +296,12 @@ function OverlayTab() {
         </button>
       </Card>
       <Card>
-        <SectionTitle icon={<Mic size={16} />}>{t('voice.title')}</SectionTitle>
-        <div className="divide-y divide-white/[0.05]">
-          <Row title={t('voice.ptt')} hint={t('voice.pttDesc')}>
-            <Switch
-              checked={prefs.voicePtt}
-              onChange={(on) => {
-                prefs.set({ voicePtt: on })
-                applyVoicePrefs()
-              }}
-            />
-          </Row>
-          {prefs.voicePtt ? (
-            <Row title={t('voice.pttKey')}>
-              <select
-                className="input w-40"
-                value={prefs.voicePttKey}
-                onChange={(e) => {
-                  prefs.set({ voicePttKey: Number(e.target.value) })
-                  applyVoicePrefs()
-                }}
-              >
-                {PTT_KEYS.map(([vk, label]) => (
-                  <option key={vk} value={vk}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </Row>
-          ) : null}
-        </div>
-        <p className="mt-3 text-xs text-slate-500">{t('voice.note')}</p>
-      </Card>
-      <Card>
         <SectionTitle icon={<Info size={16} />}>{t('settings.advanced')}</SectionTitle>
         <p className="text-sm text-slate-400">{t('settings.overlayNote')}</p>
       </Card>
     </div>
   )
 }
-
-/** Push-to-talk keys offered, as Windows virtual-key codes. */
-const PTT_KEYS: [number, string][] = [
-  [0x05, 'Mouse 4'],
-  [0x06, 'Mouse 5'],
-  [0x04, 'Mouse wheel click'],
-  [0x56, 'V'],
-  [0x42, 'B'],
-  [0x54, 'T'],
-  [0xc0, '` (~)'],
-  [0x14, 'Caps Lock'],
-  [0xa5, 'Right Alt'],
-  [0xa3, 'Right Ctrl'],
-]
 
 function About() {
   const t = useT()

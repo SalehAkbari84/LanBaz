@@ -54,6 +54,25 @@ type Settings struct {
 	// Metered is a free Metered.ca relay account. When set, LanBaz fetches
 	// its relay servers itself and uses them as the fallback path.
 	Metered *MeteredRelay `json:"metered,omitempty"`
+	// FriendRelay is this PC's relay for friends (useful in an outage, when
+	// the relays abroad cannot be reached).
+	FriendRelay *FriendRelayHost `json:"friend_relay,omitempty"`
+	// NostrRelays are extra relays for friends and online status, in addition
+	// to the built-in ones abroad: a domestic one keeps friends working in an
+	// outage. Used from the next start.
+	NostrRelays []string `json:"nostr_relays,omitempty"`
+}
+
+// FriendRelayHost is this PC's relay for friends.
+type FriendRelayHost struct {
+	Enabled bool `json:"enabled"`
+	// Port is the UDP port; the next 32 carry relayed traffic. 0 = 3478.
+	Port int `json:"port,omitempty"`
+	// User and Pass are the credential friends get in the share code.
+	User string `json:"user,omitempty"`
+	Pass string `json:"pass,omitempty"`
+	// CapMbps bounds the relay's throughput; 0 = 40.
+	CapMbps int `json:"cap_mbps,omitempty"`
 }
 
 // MeteredRelay identifies a Metered.ca TURN application.

@@ -120,6 +120,10 @@ func (r *Room) dropPending(peerID transport.PeerID) {
 // not work and then it started working".
 func (r *Room) observePeer(ev peer.Event) {
 	r.meshObserve(ev)
+	if r.isHost && ev.Kind != protocol.EventPeerStats {
+		// Membership or a state changed: tell the guests who is here.
+		go r.sendRoster(false)
+	}
 	if ev.Kind == protocol.EventPeerConnected && ev.Body.PeerID != "" {
 		// Tell a newly connected player what we are playing right away.
 		go r.announcePresence(string(ev.Body.PeerID))
@@ -136,6 +140,16 @@ func (r *Room) observePeer(ev peer.Event) {
 	}
 	if ev.Kind == protocol.EventPeerLeft {
 		if id := ev.Body.TransportPeerID; id != "" {
+			// Remember who had which address, so a player who drops and
+			// rejoins (a crash, a dropped line) comes back on the same IP.
+			if addr, ok := r.Lease(transport.PeerID(id)); ok && ev.Body.PeerID != "" && r.isHost {
+				r.netMu.Lock()
+				if r.leaseHints == nil {
+					r.leaseHints = map[string]netip.Addr{}
+				}
+				r.leaseHints[string(ev.Body.PeerID)] = addr
+				r.netMu.Unlock()
+			}
 			r.unbindPeer(transport.PeerID(id))
 			if strings.HasPrefix(string(id), meshLinkPrefix) {
 				r.meshSt.mu.Lock()

@@ -17,14 +17,20 @@
   feed (users can change it in Settings -> About). Publish with
   scripts\publish-release.ps1.
 
+  Mirror: with -MirrorUrl https://host/folder the address is built in as a
+  second update feed (tried after GitHub, e.g. during an outage), and
+  latest-mirror.json is written next to the installer. Upload the installer
+  and latest-mirror.json - renamed to latest.json - to that folder.
+
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File scripts\build-installer.ps1
 #>
 [CmdletBinding()]
 param(
-  [string]$Version = "0.6.2",
+  [string]$Version = "0.10.0",
   [switch]$SkipUI,
   [string]$UpdateRepo = $env:LANBAZ_UPDATE_REPO,
+  [string]$MirrorUrl = $env:LANBAZ_UPDATE_MIRROR,
   [string]$SigningKey = (Join-Path $env:USERPROFILE '.lanbaz\updater.key'),
   [string]$Notes = ""
 )
@@ -50,6 +56,7 @@ try {
   }
   Write-Host "== bundling the installer"
   $env:LANBAZ_UPDATE_REPO = $UpdateRepo
+  $env:LANBAZ_UPDATE_MIRROR = $MirrorUrl
   $tauriArgs = @('tauri', 'build', '--bundles', 'nsis')
   $bundleConf = @{}
   $signed = Test-Path $SigningKey
@@ -107,6 +114,12 @@ if ($signed -and $setup -and (Test-Path "$($setup.FullName).sig")) {
     $latest = Join-Path $setup.DirectoryName 'latest.json'
     [IO.File]::WriteAllText($latest, ($feed | ConvertTo-Json -Depth 5))
     Write-Host "Update feed: $latest"
+    if ($MirrorUrl) {
+      $feed.platforms.'windows-x86_64'.url = "$($MirrorUrl.TrimEnd('/'))/$($setup.Name)"
+      $mirrorFeed = Join-Path $setup.DirectoryName 'latest-mirror.json'
+      [IO.File]::WriteAllText($mirrorFeed, ($feed | ConvertTo-Json -Depth 5))
+      Write-Host "Mirror feed: $mirrorFeed (upload it as latest.json next to the installer at $MirrorUrl)"
+    }
   } else {
     Write-Host "Signed. Pass -UpdateRepo owner/repo to also write latest.json."
   }

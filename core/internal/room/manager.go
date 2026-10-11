@@ -412,6 +412,10 @@ func (m *Manager) Join(ctx context.Context, req protocol.RoomJoinRequest) (proto
 	r.isHost = false
 	r.onHostGone = func(reason string) { m.dropGuestRoom(r.ID(), reason) }
 	r.onModeChange = func(mode string) { m.guestModeChanged(r, mode) }
+	r.onRosterChange = func() {
+		s := r.Summary()
+		m.emitRoom(protocol.EventRoomUpdated, protocol.RoomEvent{RoomID: r.ID(), Name: r.name, Room: &s, At: m.now()})
+	}
 	if err := m.adopt(ctx, r); err != nil {
 		_ = r.Close(ctx)
 		return protocol.RoomJoinResponse{}, err
@@ -600,8 +604,11 @@ func (m *Manager) adopt(ctx context.Context, r *Room) error {
 	})
 	r.SetSignalHandler(func(kind string, v protocol.VoiceSignal) {
 		ev := protocol.EventVoiceSignal
-		if kind == SignalFile {
+		switch kind {
+		case SignalFile:
 			ev = NoticeFileSignal
+		case SignalScreen:
+			ev = protocol.EventScreenSignal
 		}
 		m.emit(Notice{Kind: ev, Voice: &v})
 	})

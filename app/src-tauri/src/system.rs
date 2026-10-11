@@ -180,7 +180,7 @@ pub fn started_minimized() -> bool {
 /// remote player's presence message.
 #[tauri::command]
 pub fn open_game_uri(uri: String) -> Result<(), String> {
-    const ALLOWED: [&str; 4] = ["steam://connect/", "steam://run/", "minecraft://", "samp://"];
+    const ALLOWED: [&str; 5] = ["steam://connect/", "steam://run/", "steam://rungameid/", "minecraft://", "samp://"];
     let ok_prefix = ALLOWED.iter().any(|p| uri.to_ascii_lowercase().starts_with(p));
     let ok_chars = uri.len() <= 200
         && uri
@@ -193,6 +193,34 @@ pub fn open_game_uri(uri: String) -> Result<(), String> {
     {
         std::process::Command::new("explorer.exe")
             .arg(&uri)
+            .spawn()
+            .map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+/// Starts a game's program directly, the way a double-click in Explorer does:
+/// through the shell, so the game runs as the signed-in user (not elevated
+/// like LanBaz) and from its own folder. Used for games that do not need
+/// Steam; a game that does will open Steam itself.
+#[tauri::command]
+pub fn launch_exe(path: String) -> Result<(), String> {
+    let p = std::path::Path::new(&path);
+    let is_exe = p
+        .extension()
+        .map(|e| e.eq_ignore_ascii_case("exe"))
+        .unwrap_or(false);
+    if !p.is_absolute() || !is_exe || !p.is_file() {
+        return Err("choose the game's .exe file".to_string());
+    }
+    let lower = path.to_ascii_lowercase();
+    if lower.contains(r"\windows\") {
+        return Err("not a game".to_string());
+    }
+    #[cfg(target_os = "windows")]
+    {
+        std::process::Command::new("explorer.exe")
+            .arg(&path)
             .spawn()
             .map_err(|e| e.to_string())?;
     }

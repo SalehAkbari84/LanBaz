@@ -45,6 +45,7 @@ type RoomService interface {
 	SendChat(roomID, text string) (protocol.ChatMessage, error)
 	ChatHistory(roomID string) ([]protocol.ChatMessage, error)
 	SendVoice(roomID, to string, data json.RawMessage) error
+	SendSignal(roomID, kind, to string, data json.RawMessage) error
 	SetMode(ctx context.Context, roomID, mode string) (protocol.RoomSummary, error)
 }
 
@@ -525,7 +526,14 @@ func (s *Server) handleVoiceSignal(_ context.Context, params json.RawMessage) (a
 	if req.RoomID == "" {
 		return nil, protocol.NewError(protocol.CodeBadRequest, "api: voice.signal needs a room id")
 	}
-	return struct{}{}, svc.SendVoice(req.RoomID, string(req.To), req.Data)
+	switch req.Kind {
+	case "", "voice":
+		return struct{}{}, svc.SendVoice(req.RoomID, string(req.To), req.Data)
+	case "screen":
+		return struct{}{}, svc.SendSignal(req.RoomID, "screen", string(req.To), req.Data)
+	default:
+		return nil, protocol.NewErrorf(protocol.CodeBadRequest, "api: unknown signal kind %q", req.Kind)
+	}
 }
 
 func (s *Server) handleChatHistory(_ context.Context, params json.RawMessage) (any, error) {

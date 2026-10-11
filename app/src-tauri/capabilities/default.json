@@ -4,7 +4,8 @@
   "description": "Permissions for the LanBaz main window and the in-game overlay: core window and event APIs only. The daemon sidecar is spawned by Rust, not by the webview, so no shell permission is granted; all control API traffic goes through the local WebSocket the daemon authenticates.",
   "windows": [
     "main",
-    "overlay"
+    "overlay",
+    "screen"
   ],
   "permissions": [
     "core:default",

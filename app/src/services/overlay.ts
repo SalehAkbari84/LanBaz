@@ -51,6 +51,16 @@ export function isOverlaySurface(): boolean {
   return currentLabel() === OVERLAY_LABEL
 }
 
+/** The screen-share viewer window. */
+export function isScreenSurface(): boolean {
+  return currentLabel() === 'screen'
+}
+
+/** The main window (not the overlay, not a viewer). */
+export function isMainSurface(): boolean {
+  return !isOverlaySurface() && !isScreenSurface()
+}
+
 /**
  * Shows the overlay.
  *

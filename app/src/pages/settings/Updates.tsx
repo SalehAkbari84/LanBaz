@@ -10,13 +10,15 @@ const mb = (n: number) => (n / 1048576).toFixed(1)
 /** Settings → About: check for, and install, a newer signed release. */
 export function Updates() {
   const t = useT()
-  const { status, available, checking, phase, progress, error, refresh, check, install, setRepo } = useUpdates()
+  const { status, available, checking, phase, progress, error, refresh, check, install, setRepo, setMirror } = useUpdates()
   const [repo, setRepoDraft] = useState('')
+  const [mirror, setMirrorDraft] = useState('')
   const [checked, setChecked] = useState(false)
   useEffect(() => {
     void refresh()
   }, [refresh])
   useEffect(() => setRepoDraft(status?.repo ?? ''), [status?.repo])
+  useEffect(() => setMirrorDraft(status?.mirror ?? ''), [status?.mirror])
 
   const pct = progress?.total ? Math.min(100, Math.round((progress.done / progress.total) * 100)) : null
   return (
@@ -40,6 +42,22 @@ export function Updates() {
             {t('update.saveRepo')}
           </button>
         </div>
+      </label>
+
+      <label className="mt-3 block text-xs text-slate-400">
+        {t('update.mirror')}
+        <div className="ltr mt-1 flex items-center gap-2">
+          <input className="input ltr text-xs" value={mirror} placeholder="https://dl.example.ir/lanbaz" disabled={phase !== 'idle'} onChange={(e) => setMirrorDraft(e.target.value)} />
+          <button
+            type="button"
+            className="btn btn-sm"
+            disabled={phase !== 'idle' || mirror.trim() === (status?.mirror ?? '')}
+            onClick={() => void setMirror(mirror).catch((e) => useUpdates.setState({ error: String(e) }))}
+          >
+            {t('update.saveRepo')}
+          </button>
+        </div>
+        <span className="mt-1 block text-[11px] text-slate-500">{t('update.mirrorHint')}</span>
       </label>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">

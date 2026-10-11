@@ -16,7 +16,8 @@ import { HomePage } from './pages/HomePage'
 import { OverlayPage } from './pages/OverlayPage'
 import { RoomsPage } from './pages/RoomsPage'
 import { SettingsPage } from './pages/SettingsPage'
-import { isOverlaySurface } from './services/overlay'
+import { isMainSurface, isOverlaySurface, isScreenSurface } from './services/overlay'
+import { ScreenViewer } from './pages/ScreenViewer'
 import { useChatStore } from './stores/chat'
 import { useDaemonStore } from './stores/daemon'
 import { useUpdates } from './stores/updates'
@@ -38,7 +39,7 @@ export default function App() {
   // Updates: shortly after start, then every 10 minutes; a new version is
   // asked about on the main screen (UpdateDock). Main window only.
   useEffect(() => {
-    if (overlay) return
+    if (!isMainSurface()) return
     const run = () => void useUpdates.getState().checkAndAsk()
     const first = setTimeout(run, 15000)
     const every = setInterval(run, 10 * 60 * 1000)
@@ -60,6 +61,10 @@ export default function App() {
   useEffect(() => {
     useChatStore.getState().setViewing(page === 'chat')
   }, [page])
+
+  if (isScreenSurface()) {
+    return <ScreenViewer />
+  }
 
   if (overlay) {
     return (

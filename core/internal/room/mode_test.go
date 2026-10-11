@@ -111,3 +111,77 @@ func TestSwitchingNetworkTypeKeepsTheRoom(t *testing.T) {
 		return err == nil && st.Adapter == "memory"
 	})
 }
+
+// A friend whose link dropped and who rejoins gets the same address back,
+// even while the host still holds their old, dead link.
+func TestRejoiningFriendKeepsTheirAddress(t *testing.T) {
+	events := make(chan room.Notice, 512)
+	stop := drainEvents(events)
+	defer stop()
+	host := newDualSide(t, "host", events)
+	guest := newDualSide(t, "guest", events)
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	defer cancel()
+
+	created, err := host.Create(ctx, protocol.RoomCreateRequest{Name: "rejoin"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	roomID := created.Room.RoomID
+	join := func(code string) {
+		t.Helper()
+		joined, err := guest.Join(ctx, protocol.RoomJoinRequest{PairingCode: code})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := host.Accept(ctx, protocol.RoomAcceptRequest{RoomID: roomID, AnswerCode: joined.AnswerCode}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	guestIdentity := func() string { // as the host sees the guest
+		r, err := host.Get(roomID)
+		if err != nil {
+			return ""
+		}
+		for _, p := range r.Summary().Peers {
+			if !p.IsSelf && !p.IsHost && p.PeerID != "" {
+				return string(p.PeerID)
+			}
+		}
+		return ""
+	}
+	addrOnHost := func(id string) string {
+		r, err := host.Get(roomID)
+		if err != nil {
+			return ""
+		}
+		for _, p := range r.Summary().Peers {
+			if string(p.PeerID) == id && p.VirtualAddress != "" && (p.State == protocol.PeerActive || p.State == protocol.PeerNetworkReady) {
+				return p.VirtualAddress
+			}
+		}
+		return ""
+	}
+
+	join(created.PairingCode)
+	var id string
+	waitFor(t, "the guest knows its identity", 30*time.Second, func() bool { id = guestIdentity(); return id != "" })
+	var first string
+	waitFor(t, "the guest is addressed", 60*time.Second, func() bool { first = addrOnHost(id); return first != "" })
+
+	// The guest's side of the room goes away without a goodbye reaching the
+	// host (a crash, a dropped line); the host still lists the old link.
+	if err := guest.Leave(ctx, roomID); err != nil {
+		t.Fatal(err)
+	}
+	again, err := host.RegeneratePairing(ctx, protocol.RoomRegeneratePairingRequest{RoomID: roomID, ForPeer: id})
+	if err != nil {
+		t.Fatal(err)
+	}
+	join(again.PairingCode)
+	var second string
+	waitFor(t, "the guest is addressed again", 60*time.Second, func() bool { second = addrOnHost(id); return second != "" })
+	if second != first {
+		t.Fatalf("the rejoining friend moved from %s to %s", first, second)
+	}
+}

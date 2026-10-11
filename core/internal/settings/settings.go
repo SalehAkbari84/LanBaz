@@ -223,6 +223,35 @@ func Normalize(in protocol.Settings) (protocol.Settings, error) {
 			"settings: relay-only needs a TURN server and \"use a relay\" turned on")
 	}
 	out.Network = &net
+	if fr := in.FriendRelay; fr != nil {
+		r := *fr
+		if r.Port != 0 && (r.Port < 1024 || r.Port > 65535-33) {
+			return protocol.Settings{}, protocol.NewError(protocol.CodeBadRequest,
+				"settings: the friend relay port must be between 1024 and 65500")
+		}
+		if r.CapMbps < 0 || r.CapMbps > 1000 {
+			return protocol.Settings{}, protocol.NewError(protocol.CodeBadRequest,
+				"settings: the friend relay cap must be between 1 and 1000 Mbit/s")
+		}
+		r.User, r.Pass = strings.TrimSpace(r.User), strings.TrimSpace(r.Pass)
+		out.FriendRelay = &r
+	}
+	for _, u := range in.NostrRelays {
+		u = strings.TrimSpace(u)
+		if u == "" {
+			continue
+		}
+		low := strings.ToLower(u)
+		if !strings.HasPrefix(low, "wss://") && !strings.HasPrefix(low, "ws://") || len(u) > 200 || strings.ContainsAny(u, " \t") {
+			return protocol.Settings{}, protocol.NewErrorf(protocol.CodeBadRequest,
+				"settings: %q must look like wss://relay.example.ir", u)
+		}
+		out.NostrRelays = append(out.NostrRelays, u)
+	}
+	if len(out.NostrRelays) > MaxServers {
+		return protocol.Settings{}, protocol.NewErrorf(protocol.CodeBadRequest,
+			"settings: at most %d friend relays", MaxServers)
+	}
 	if out.AllowRelay && len(out.TURNServers) == 0 {
 		return protocol.Settings{}, protocol.NewError(protocol.CodeBadRequest,
 			"settings: relay is enabled but no TURN server is configured")
@@ -264,6 +293,11 @@ func checkURL(raw string, schemes ...string) error {
 func clone(s protocol.Settings) protocol.Settings {
 	s.STUNServers = append([]string(nil), s.STUNServers...)
 	s.TURNServers = append([]protocol.RelayServer(nil), s.TURNServers...)
+	s.NostrRelays = append([]string(nil), s.NostrRelays...)
+	if s.FriendRelay != nil {
+		fr := *s.FriendRelay
+		s.FriendRelay = &fr
+	}
 	if s.Network != nil {
 		n := *s.Network
 		s.Network = &n

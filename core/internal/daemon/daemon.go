@@ -47,7 +47,7 @@ type BuildInfo struct {
 }
 
 // DefaultBuildInfo is used when ldflags were not provided (go run, tests).
-var DefaultBuildInfo = BuildInfo{Version: "0.6.2-dev", Commit: "unknown", BuildTime: "unknown"}
+var DefaultBuildInfo = BuildInfo{Version: "0.10.0-dev", Commit: "unknown", BuildTime: "unknown"}
 
 // Daemon is the running control plane.
 type Daemon struct {
@@ -83,6 +83,10 @@ type Daemon struct {
 	detector *games.Detector
 	// profiles are the bundled game profiles.
 	profiles []profiles.Profile
+	// steam is the outage helper's state (steam.go).
+	steam steamState
+	// relay is this PC's relay for friends and the outage check (friendrelay.go).
+	relay relayHost
 
 	// The virtual network. See network.go: the daemon owns the decision about
 	// which adapter backend to use, and the network package owns everything
@@ -227,7 +231,10 @@ func New(opts Options) (*Daemon, error) {
 	}
 	bus := opts.SocialBus
 	if bus == nil && os.Getenv("LANBAZ_NO_FRIENDS") == "" {
-		bus = social.NewRelayBus(context.Background(), social.DefaultRelays)
+		// Extra relays (a domestic one keeps friends working in an outage)
+		// come first; the built-in ones abroad follow.
+		relays := append(append([]string(nil), d.settings.Get().NostrRelays...), social.DefaultRelays...)
+		bus = social.NewRelayBus(context.Background(), relays)
 	}
 	if bus != nil {
 		if err := d.initFriends(bus); err != nil {
@@ -250,6 +257,12 @@ func New(opts Options) (*Daemon, error) {
 		return nil, err
 	}
 	if err := d.registerGameApply(); err != nil {
+		return nil, err
+	}
+	if err := d.registerSteam(); err != nil {
+		return nil, err
+	}
+	if err := d.registerFriendRelay(); err != nil {
 		return nil, err
 	}
 	return d, nil
@@ -578,6 +591,8 @@ func (d *Daemon) Run(ctx context.Context) error {
 	}
 	go d.watchGames(ctx)
 	go d.keepRelays(ctx)
+	go d.startFriendRelay(ctx)
+	go d.outageCheck(ctx, true) // logs the reachability once at start
 	if d.friends != nil {
 		go d.friends.svc.Run(ctx)
 		go d.friends.runKeep(ctx)
@@ -631,6 +646,7 @@ func (d *Daemon) finish() {
 	if err := d.api.Shutdown(ctx); err != nil {
 		d.log.Warn("api shutdown did not complete cleanly", "error", err)
 	}
+	d.stopFriendRelay()
 	// Rooms are closed after the API, so a UI that is still connected learns
 	// why each link went away before the socket carrying the news disappears.
 	if svc := d.Rooms(); svc != nil {

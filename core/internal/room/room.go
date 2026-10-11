@@ -140,6 +140,10 @@ type Room struct {
 	onHostGone func(reason string)
 	// onModeChange is called (on a guest) when the host switches the mode.
 	onModeChange func(mode string)
+	// roster is the host's member list, as a guest last heard it.
+	roster rosterState
+	// onRosterChange is called (on a guest) when that list changes.
+	onRosterChange func()
 
 	closeOnce sync.Once
 	done      chan struct{}
@@ -345,6 +349,7 @@ func Create(opts Options) (*Room, error) {
 	r.installPresence()
 	r.installSignals()
 	r.installModeSync()
+	r.installRoster()
 	return r, nil
 }
 
@@ -425,6 +430,7 @@ func (r *Room) Summary() protocol.RoomSummary {
 		}
 	}
 	r.leasesMu.RUnlock()
+	peers = r.withRoster(peers)
 
 	out := protocol.RoomSummary{
 		RoomID:           id,
@@ -602,6 +608,7 @@ func (r *Room) Run(ctx context.Context) {
 		case <-ticker.C:
 			r.expirePending(pendingJoinTTL)
 			r.reconcile()
+			r.sendRoster(true)
 		}
 	}
 }

@@ -43,6 +43,8 @@ type link struct {
 	// a ping into a channel that does not exist yet.
 	controlOpen chan struct{}
 	closedCh    chan struct{}
+	// lastRx is when anything (control or game data) last arrived, UnixNano.
+	lastRx      atomic.Int64
 	once        sync.Once
 	controlOnce sync.Once
 	closeOnce   sync.Once
@@ -779,6 +781,7 @@ func (t *Transport) Send(peer transport.PeerID, packet []byte) error {
 // manager installs one; keeping it here means the transport never imports the
 // peer package and the dependency stays one-way.
 func (l *link) onControlMessage(msg webrtc.DataChannelMessage) {
+	l.lastRx.Store(time.Now().UnixNano())
 	l.bytesRecv.Add(uint64(len(msg.Data)))
 	l.framesRecv.Add(1)
 	h := l.transport.controlHandler()
@@ -790,6 +793,7 @@ func (l *link) onControlMessage(msg webrtc.DataChannelMessage) {
 
 // onDataMessage pushes a game packet into the transport's receive channel.
 func (l *link) onDataMessage(msg webrtc.DataChannelMessage) {
+	l.lastRx.Store(time.Now().UnixNano())
 	l.bytesRecv.Add(uint64(len(msg.Data)))
 	l.framesRecv.Add(1)
 

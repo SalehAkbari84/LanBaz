@@ -80,7 +80,9 @@ const (
 	EventGameDetected   = "game.detected"
 	EventChatMessage    = "chat.message"
 	EventVoiceSignal    = "voice.signal"
-	EventPeerPresence   = "peer.presence"
+	// EventScreenSignal carries screen-share signalling (VoiceSignal shape).
+	EventScreenSignal = "screen.signal"
+	EventPeerPresence = "peer.presence"
 )
 
 // Methods returns every declared method name. Used by tests and docs.
@@ -95,6 +97,8 @@ func Methods() []string {
 		MethodSettingsGet, MethodSettingsSet, MethodPairingInspect,
 		MethodChatSend, MethodChatHistory, MethodVoiceSignal, MethodRoomSetMode,
 		MethodFileOffer, MethodFileRespond, MethodFileCancel, MethodFileList, MethodDiagBundle, MethodGameFirewall, MethodGameFirewallFix, MethodGameApply,
+		MethodSteamStatus, MethodSteamSetOffline, MethodSteamSetExe,
+		MethodOutageCheck, MethodFriendRelayStatus, MethodFriendRelaySet, MethodFriendRelayAdd,
 		MethodDaemonStatus, MethodDaemonVersion, MethodDaemonShutdown,
 		MethodFriendsList, MethodFriendsAdd, MethodFriendsRespond, MethodFriendsRemove,
 		MethodFriendsTrust, MethodJoinRequest, MethodJoinInvite, MethodJoinRespond,
@@ -108,7 +112,7 @@ func Events() []string {
 		EventRoomUpdated, EventDaemonState, EventDaemonStopping, EventDaemonLog,
 		EventRoomCreated, EventRoomClosed,
 		EventPeerJoined, EventPeerLeft, EventPeerState, EventPeerStats, EventPeerConnected,
-		EventNetworkChanged, EventGameDetected, EventChatMessage, EventVoiceSignal, EventFileUpdate, EventGameFirewall, EventPeerPresence,
+		EventNetworkChanged, EventGameDetected, EventChatMessage, EventVoiceSignal, EventScreenSignal, EventFileUpdate, EventGameFirewall, EventPeerPresence,
 		EventFriendUpdate, EventJoinPrompt, EventJoinStatus,
 	}
 }

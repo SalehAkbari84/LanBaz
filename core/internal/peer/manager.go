@@ -827,10 +827,38 @@ func (m *Manager) reap(p *Peer) {
 	if !missed {
 		return
 	}
+	// Probes ride the ordered control channel; game data rides its own. When
+	// the line is lossy the control channel can lag behind for a few seconds
+	// while game traffic is still arriving - the peer is plainly there. Late
+	// probes are then not counted as lost, and the link is never dropped
+	// while the other side is still sending.
+	if m.trafficFlowing(p) {
+		p.mu.Lock()
+		p.missed = 0
+		p.mu.Unlock()
+		m.log.Debug("probes are late but traffic from the peer is arriving; keeping the link", "peer", string(p.id))
+		return
+	}
 	for i := 0; i < count; i++ {
 		p.est.recordTimeout()
 	}
 	m.noteMiss(p)
+}
+
+// aliveWindow is how recent any traffic from a peer must be to count as alive.
+const aliveWindow = 4 * time.Second
+
+// trafficFlowing reports whether the transport received anything from the
+// peer within aliveWindow.
+func (m *Manager) trafficFlowing(p *Peer) bool {
+	lr, ok := m.tr.(interface {
+		LastReceived(transport.PeerID) time.Time
+	})
+	if !ok {
+		return false
+	}
+	at := lr.LastReceived(p.id)
+	return !at.IsZero() && m.now().Sub(at) < aliveWindow
 }
 
 // noteMiss counts a lost probe and demotes or fails the link as it crosses the

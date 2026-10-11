@@ -14,13 +14,14 @@ import { useGamesStore } from './games'
 import { usePrefs } from './prefs'
 import { useQuality } from './quality'
 import { useVoice } from './voice'
+import { useScreen, type ScreenSignal } from './screen'
 import { useFiles, type FileTransfer } from './files'
 import { useGameFirewall, type GameFirewall } from './gameFirewall'
 import { useRoomsStore } from './rooms'
 import { toast } from './toasts'
 import { translate } from '../i18n'
 import { DaemonClient, DaemonError, type ConnectionState } from '../services/daemon-client'
-import { announce, isOverlaySurface } from '../services/overlay'
+import { announce, isMainSurface, isOverlaySurface } from '../services/overlay'
 import {
   daemonEndpoint,
   isElevated,
@@ -150,7 +151,7 @@ export const useDaemonStore = create<DaemonState>((set, get) => ({
     }
 
     try {
-      if (!isOverlaySurface()) {
+      if (isMainSurface()) {
         // Not fatal: the user may have started lanbazd by hand.
         await startDaemonSidecar().catch(() => undefined)
       }
@@ -225,7 +226,7 @@ export const useDaemonStore = create<DaemonState>((set, get) => ({
               useRoomsStore.getState().announced.add(event.peer?.link_id ?? event.peer_id)
               notifyPeer('overlay.joined', name)
               // Someone arriving mid-match is exactly what the overlay is for.
-              if (!isOverlaySurface()) void announce()
+              if (isMainSurface()) void announce()
             }
           }
         }),
@@ -241,6 +242,9 @@ export const useDaemonStore = create<DaemonState>((set, get) => ({
         }),
         next.on<FileTransfer>('file.update', (f) => {
           useFiles.getState().apply(f)
+        }),
+        next.on<{ room_id: string; from?: string; data: ScreenSignal }>('screen.signal', (v) => {
+          useScreen.getState().onSignal(v.room_id, v.from ?? '', v.data)
         }),
         next.on<{ room_id: string; from?: string; data: never }>('voice.signal', (v) => {
           useVoice.getState().onSignal(v.room_id, v.from ?? '', v.data)
@@ -272,8 +276,8 @@ export const useDaemonStore = create<DaemonState>((set, get) => ({
           const chat = useChatStore.getState()
           if (!m.self && usePrefs.getState().toastChat && !(chat.viewing && !isOverlaySurface())) {
             toast({ tone: 'chat', title: m.name || '?', body: m.text, who: m.name || '?' })
-            if (usePrefs.getState().soundOnChat && !isOverlaySurface()) chime()
-            if (!isOverlaySurface()) void announce()
+            if (usePrefs.getState().soundOnChat && isMainSurface()) chime()
+            if (isMainSurface()) void announce()
           }
         }),
         next.on<NetworkEvent>(EVENT.networkChanged, (event) => {
@@ -373,6 +377,11 @@ function notifyPeer(key: 'overlay.joined' | 'overlay.left', name: string): void 
   const prefs = usePrefs.getState()
   if (!prefs.toastJoinLeave) return
   toast({ tone: key === 'overlay.joined' ? 'ok' : 'info', title: translate(prefs.language, key, { name }), who: name, key: `peer:${name}` })
+}
+
+/** Reloads the settings after the daemon changed them itself (a friend's relay code). */
+export async function reloadSettings(): Promise<void> {
+  await loadSettings((p) => useDaemonStore.setState(p))
 }
 
 async function loadSettings(set: (partial: Partial<DaemonState>) => void): Promise<void> {

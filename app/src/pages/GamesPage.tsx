@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { Avatar, Card, CopyButton, EmptyState, PageHeader, SectionTitle, Segmented } from '../components/ui'
 import { GameApplyButton } from '../components/GameApplyButton'
+import { SteamOffline } from '../components/SteamOffline'
 import { useT } from '../i18n'
 import { openGameUri } from '../services/tauri'
 import { useDaemonStore } from '../stores/daemon'
@@ -41,6 +42,7 @@ export function GamesPage() {
   return (
     <>
       <PageHeader title={t('games.title')} subtitle={t('games.subtitle')} />
+      <SteamOffline />
 
       <FriendsPlaying />
 

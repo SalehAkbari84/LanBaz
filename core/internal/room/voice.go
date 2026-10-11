@@ -21,8 +21,9 @@ import (
 
 const (
 	// SignalVoice and SignalFile are the signalling kinds a room carries.
-	SignalVoice = "voice"
-	SignalFile  = "file"
+	SignalVoice  = "voice"
+	SignalFile   = "file"
+	SignalScreen = "screen"
 	// maxSignal bounds one signalling message; an SDP is a few KB.
 	maxSignal = 32 << 10
 )
@@ -37,7 +38,7 @@ type signalState struct {
 }
 
 func (r *Room) installSignals() {
-	for _, kind := range []string{SignalVoice, SignalFile} {
+	for _, kind := range []string{SignalVoice, SignalFile, SignalScreen} {
 		r.onAppKind(kind, func(_ *peer.Peer, msg peer.AppMessage) { r.receiveSignal(kind, msg) })
 	}
 }
@@ -52,7 +53,7 @@ func (r *Room) SetSignalHandler(fn func(kind string, s protocol.VoiceSignal)) {
 // SendSignal sends a signalling message of one kind to one player, or to all
 // when to is "".
 func (r *Room) SendSignal(kind, to string, data json.RawMessage) error {
-	if kind != SignalVoice && kind != SignalFile {
+	if kind != SignalVoice && kind != SignalFile && kind != SignalScreen {
 		return protocol.NewErrorf(protocol.CodeBadRequest, "room: unknown signal kind %q", kind)
 	}
 	if len(data) == 0 || len(data) > maxSignal || !json.Valid(data) {

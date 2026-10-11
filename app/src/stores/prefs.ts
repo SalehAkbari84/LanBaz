@@ -28,6 +28,20 @@ export interface Prefs {
   voicePttKey: number
   soundOnChat: boolean
   compactPlayers: boolean
+  /** Audio devices ('' = the system default). */
+  micDeviceId: string
+  speakerDeviceId: string
+  /** Input volume, 0..2 (1 = as the device gives it). */
+  micGain: number
+  /** Output volume for voice chat and screen share sound, 0..1. */
+  outputVolume: number
+  echoCancel: boolean
+  noiseSuppress: boolean
+  autoGain: boolean
+  /** Open mic sends only while you are louder than voiceThreshold. */
+  voiceActivation: boolean
+  /** Voice activation threshold as a meter position, 0..1 (-60..0 dB). */
+  voiceThreshold: number
 }
 
 const KEY = 'lanbaz.prefs.v1'
@@ -54,6 +68,15 @@ export const DEFAULT_PREFS: Prefs = {
   voicePttKey: 0x05,
   soundOnChat: false,
   compactPlayers: false,
+  micDeviceId: '',
+  speakerDeviceId: '',
+  micGain: 1,
+  outputVolume: 1,
+  echoCancel: true,
+  noiseSuppress: true,
+  autoGain: true,
+  voiceActivation: false,
+  voiceThreshold: 0.45,
 }
 
 function load(): Prefs {

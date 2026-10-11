@@ -7,6 +7,7 @@ import (
 	"encoding/base32"
 	"encoding/base64"
 	"errors"
+	"net/netip"
 	"time"
 
 	"github.com/lanbaz/lanbaz/core/internal/pairing"
@@ -102,6 +103,30 @@ func (r *Room) IssuePairingFor(ctx context.Context, ttl time.Duration, identity 
 	// the only one that can promise an address is free. Naming it in the code
 	// means the guest knows its own address the moment it decodes - no extra
 	// round trip in a handshake that already needs a human to carry two blobs.
+	if identity != "" && r.isHost {
+		// The friend is rejoining: any link we still hold for them is dead
+		// (they would not ask otherwise). Dropping it now frees their address,
+		// so they come back on the same IP instead of the next free one - a
+		// changed IP is enough to drop them from a running game.
+		for _, p := range r.pm.List() {
+			if string(p.PeerID) == identity && !p.IsSelf && p.TransportPeerID != "" {
+				r.log.Info("a friend is rejoining; replacing their old link so they keep their address",
+					"room", r.id, "peer", identity, "address", p.VirtualAddress)
+				// Whatever address they had is the one they get back.
+				if prev, err := netip.ParseAddr(p.VirtualAddress); err == nil {
+					r.netMu.Lock()
+					if r.leaseHints == nil {
+						r.leaseHints = map[string]netip.Addr{}
+					}
+					r.leaseHints[identity] = prev
+					r.netMu.Unlock()
+				}
+				r.pm.Remove(transport.PeerID(p.TransportPeerID))
+				// Release the address now, not when the removal event arrives.
+				r.unbindPeer(transport.PeerID(p.TransportPeerID))
+			}
+		}
+	}
 	guestAddr, err := r.allocateGuestAddr(string(guestID), identity)
 	if err != nil {
 		return protocol.PairingResponse{}, err

@@ -17,6 +17,7 @@ mod hotkey;
 mod invite;
 mod overlay;
 mod ptt;
+mod screen;
 mod singleinstance;
 mod supervisor;
 mod system;
@@ -130,10 +131,12 @@ pub fn run() {
             invite::read_clipboard_text,
             invite::save_invite_file,
             system::open_game_uri,
+            system::launch_exe,
             system::install_tap_driver,
             system::restart_app,
             updater::update_status,
             updater::update_set_repo,
+            updater::update_set_mirror,
             updater::update_check,
             updater::update_install,
             updater::update_download,
@@ -141,6 +144,7 @@ pub fn run() {
             ptt::ptt_set_key,
             files::reveal_received,
             files::pick_files,
+            screen::open_screen_viewer,
             tray_set_networks,
         ])
         .setup(move |app| {

@@ -6,6 +6,12 @@
 // that never leaves the maintainer's PC; the public half is in tauri.conf.json,
 // so a tampered or foreign installer is refused before it runs.
 //
+// A mirror (LANBAZ_UPDATE_MIRROR at build time, or <state-dir>/update-mirror.txt)
+// is a second feed: an https folder holding its own latest.json and the
+// installer. It is tried after GitHub, so during an international outage an
+// update can still come from a server inside the country. The signature check
+// is the same, so a mirror cannot hand out anything the maintainer did not sign.
+//
 // Install order matters: the installer is downloaded and verified first, then
 // the daemon is stopped gracefully (it removes its adapter, routes and firewall
 // rule and says goodbye to peers), and only then is the installer started -
@@ -29,6 +35,7 @@ pub struct Downloaded(Mutex<Option<(Update, Vec<u8>)>>);
 pub struct UpdateStatus {
     configured: bool,
     repo: String,
+    mirror: String,
     current: String,
 }
 
@@ -58,6 +65,30 @@ fn repo() -> Option<String> {
         .filter(|r| valid_repo(r))
 }
 
+fn mirror() -> Option<String> {
+    let file = super::daemon::state_dir().join("update-mirror.txt");
+    if let Ok(text) = std::fs::read_to_string(file) {
+        let m = text.trim().trim_end_matches('/').to_string();
+        if valid_mirror(&m) {
+            return Some(m);
+        }
+    }
+    option_env!("LANBAZ_UPDATE_MIRROR")
+        .map(|m| m.trim().trim_end_matches('/').to_string())
+        .filter(|m| valid_mirror(m))
+}
+
+/// An https URL of a folder: no query, no fragment, no spaces.
+fn valid_mirror(m: &str) -> bool {
+    let Some(rest) = m.strip_prefix("https://") else {
+        return false;
+    };
+    !rest.is_empty()
+        && m.len() <= 300
+        && !m.contains(['?', '#', ' ', '\\', '"'])
+        && rest.split('/').next().is_some_and(|h| !h.is_empty())
+}
+
 /// owner/repo, GitHub's allowed characters only.
 fn valid_repo(r: &str) -> bool {
     let mut parts = r.split('/');
@@ -82,11 +113,28 @@ fn feed(repo: &str) -> Result<tauri::Url, String> {
 #[tauri::command]
 pub fn update_status(app: AppHandle) -> UpdateStatus {
     let repo = repo().unwrap_or_default();
+    let mirror = mirror().unwrap_or_default();
     UpdateStatus {
-        configured: !repo.is_empty(),
+        configured: !repo.is_empty() || !mirror.is_empty(),
         repo,
+        mirror,
         current: app.package_info().version.to_string(),
     }
+}
+
+/// Saves the update mirror (an https folder); an empty string clears it.
+#[tauri::command]
+pub fn update_set_mirror(url: String) -> Result<(), String> {
+    let url = url.trim().trim_end_matches('/');
+    let path = super::daemon::state_dir().join("update-mirror.txt");
+    if url.is_empty() {
+        let _ = std::fs::remove_file(path);
+        return Ok(());
+    }
+    if !valid_mirror(url) {
+        return Err("expected an https address, for example https://dl.example.ir/lanbaz".into());
+    }
+    std::fs::write(path, url).map_err(|e| e.to_string())
 }
 
 /// Saves the release repo ("owner/repo"); an empty string clears it.
@@ -106,13 +154,22 @@ pub fn update_set_repo(repo: String) -> Result<(), String> {
 
 #[tauri::command]
 pub async fn update_check(app: AppHandle) -> Result<Option<UpdateInfo>, String> {
-    let Some(repo) = repo() else {
+    let mut endpoints = Vec::new();
+    if let Some(repo) = repo() {
+        endpoints.push(feed(&repo)?);
+    }
+    if let Some(m) = mirror() {
+        endpoints.push(format!("{m}/latest.json").parse().map_err(|e| format!("{e}"))?);
+    }
+    if endpoints.is_empty() {
         return Ok(None);
-    };
+    }
+    // In an outage GitHub hangs rather than refuses; do not wait long for it.
     let updater = app
         .updater_builder()
-        .endpoints(vec![feed(&repo)?])
+        .endpoints(endpoints)
         .map_err(|e| e.to_string())?
+        .timeout(std::time::Duration::from_secs(20))
         .build()
         .map_err(|e| e.to_string())?;
     let found = updater.check().await.map_err(|e| e.to_string())?;
@@ -182,7 +239,16 @@ pub async fn update_install(app: AppHandle) -> Result<(), String> {
 
 #[cfg(test)]
 mod tests {
-    use super::valid_repo;
+    use super::{valid_mirror, valid_repo};
+
+    #[test]
+    fn mirror_urls() {
+        assert!(valid_mirror("https://dl.example.ir/lanbaz"));
+        assert!(valid_mirror("https://1.2.3.4/x"));
+        for bad in ["", "http://dl.example.ir", "https://", "https://a b", "https://x/?a=1", "ftp://x", "https://x/#y"] {
+            assert!(!valid_mirror(bad), "{bad}");
+        }
+    }
 
     #[test]
     fn repo_names() {

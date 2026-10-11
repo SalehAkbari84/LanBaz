@@ -13,6 +13,8 @@ const failed = (e: unknown) =>
 export interface UpdateStatus {
   configured: boolean
   repo: string
+  /** An https folder with its own latest.json, tried after GitHub. */
+  mirror: string
   current: string
 }
 
@@ -44,6 +46,7 @@ interface UpdateState {
   /** Download, then close the rooms and install. */
   install: () => Promise<void>
   setRepo: (repo: string) => Promise<void>
+  setMirror: (url: string) => Promise<void>
 }
 
 const SNOOZE_MS = 2 * 3600 * 1000
@@ -120,6 +123,12 @@ export const useUpdates = create<UpdateState>((set, get) => ({
       set({ error: String(e), phase: 'idle', progress: null })
       failed(e)
     }
+  },
+
+  setMirror: async (url) => {
+    await invoke('update_set_mirror', { url })
+    set({ available: null })
+    await get().refresh()
   },
 
   setRepo: async (repo) => {

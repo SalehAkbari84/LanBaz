@@ -39,6 +39,8 @@ import (
 // Channel names. They are negotiated by Pion's in-band header, so both sides
 // must agree on them.
 const (
+	// sctpRTOMax caps SCTP retransmission backoff (see NewTransport).
+	sctpRTOMax     = 2500 * time.Millisecond
 	ControlChannel = "control"
 	DataChannel    = "data"
 )
@@ -304,6 +306,13 @@ func New(opts Options) (*Transport, error) {
 	// large data channel frame.
 	se := webrtc.SettingEngine{}
 	se.SetSCTPMaxMessageSize(maxControlMessage)
+	// Pion's SCTP backs off a retransmission up to 60 s by default. On a lossy
+	// line during a match (seen: RTT jumping to 150 ms, jitter 80 ms) a couple
+	// of lost control frames then froze the ordered control channel - pings
+	// and pongs with it - for 10-20 s while game data kept flowing, and the
+	// link was declared dead mid-game. Capping the backoff keeps the control
+	// channel recovering within seconds.
+	se.SetSCTPRTOMax(sctpRTOMax)
 	// A machine already in another LanBaz room has a 10.200.x.x address, and
 	// offering it as an ICE candidate would let a link be built *through* an
 	// existing tunnel - which works until that room closes and then takes this
@@ -430,6 +439,18 @@ func (t *Transport) isClosed() bool {
 // Every per-peer operation funnels through here so that a closed transport and a
 // deleted link are reported the same way instead of one panicking on a nil
 // dereference.
+// LastReceived is when anything last arrived from a peer (zero if never).
+func (t *Transport) LastReceived(peer transport.PeerID) time.Time {
+	l, ok := t.link(peer)
+	if !ok {
+		return time.Time{}
+	}
+	if n := l.lastRx.Load(); n > 0 {
+		return time.Unix(0, n)
+	}
+	return time.Time{}
+}
+
 func (t *Transport) link(peer transport.PeerID) (*link, bool) {
 	t.mu.RLock()
 	defer t.mu.RUnlock()

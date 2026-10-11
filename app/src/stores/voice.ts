@@ -17,6 +17,8 @@ import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import { create } from 'zustand'
 
+import { meterPos, MicPipeline, routeTo } from '../services/audio'
+import { gathered, tunnelOnly } from '../services/rtc'
 import { isTauri } from '../services/tauri'
 import { daemonClient } from './daemon'
 import { usePrefs } from './prefs'
@@ -54,40 +56,20 @@ interface VoiceState {
 // Live objects that do not belong in React state.
 const links = new Map<string, { pc: RTCPeerConnection; audio: HTMLAudioElement; meter?: () => void }>()
 let mic: MediaStream | null = null
+let pipe: MicPipeline | null = null
 let ctx: AudioContext | null = null
 let stopLocalMeter: (() => void) | null = null
 let unlistenPtt: (() => void) | null = null
+/** Voice activation: above the threshold now, or within the hang time. */
+let gateOpen = false
 
 const SPEAKING_RMS = 0.04
+/** How long voice activation stays open after you stop, so words are not clipped. */
+const GATE_HANG_MS = 450
 
 /** This join's session id (see the comment at the top). */
 let sid = ''
 
-/** Keeps only candidates on the room's own addresses, so audio uses the tunnel. */
-function tunnelOnly(sdp: string): string {
-  return sdp
-    .split('\r\n')
-    .filter((line) => {
-      if (!line.startsWith('a=candidate:')) return true
-      const addr = line.split(' ')[4] ?? ''
-      return addr.startsWith('10.200.') || addr.endsWith('.local')
-    })
-    .join('\r\n')
-}
-
-/** Waits until every candidate is in the local description (or 3 s). */
-function gathered(pc: RTCPeerConnection): Promise<void> {
-  if (pc.iceGatheringState === 'complete') return Promise.resolve()
-  return new Promise((resolve) => {
-    const done = () => {
-      if (pc.iceGatheringState !== 'complete') return
-      pc.removeEventListener('icegatheringstatechange', done)
-      resolve()
-    }
-    pc.addEventListener('icegatheringstatechange', done)
-    setTimeout(resolve, 3000)
-  })
-}
 
 async function send(roomId: string, to: string, data: Signal): Promise<void> {
   await daemonClient()?.request('voice.signal', { room_id: roomId, to, data })
@@ -115,11 +97,40 @@ function meter(stream: MediaStream, onLevel: (speaking: boolean) => void): () =>
   }
 }
 
-function applyMicState(): void {
+function micLive(): boolean {
   const { muted, pttHeld } = useVoice.getState()
-  const ptt = usePrefs.getState().voicePtt
-  const live = ptt ? pttHeld : !muted
+  const p = usePrefs.getState()
+  if (p.voicePtt) return pttHeld
+  return !muted && (!p.voiceActivation || gateOpen)
+}
+
+function applyMicState(): void {
+  const live = micLive()
   mic?.getAudioTracks().forEach((t) => (t.enabled = live))
+}
+
+/** The local meter: drives the talking indicator and voice activation. */
+function localMeter(p: MicPipeline): () => void {
+  let lastLoud = 0
+  const id = window.setInterval(() => {
+    const prefs = usePrefs.getState()
+    const pos = meterPos(p.level())
+    const threshold = prefs.voiceActivation ? prefs.voiceThreshold : meterPos(SPEAKING_RMS)
+    const now = Date.now()
+    if (pos >= threshold) lastLoud = now
+    const open = now - lastLoud < GATE_HANG_MS
+    if (open !== gateOpen) {
+      gateOpen = open
+      applyMicState()
+    }
+    const speaking = open && micLive()
+    if (speaking !== useVoice.getState().speaking) useVoice.setState({ speaking })
+  }, 40)
+  return () => window.clearInterval(id)
+}
+
+function playbackVolume(peerVolume: number): number {
+  return Math.max(0, Math.min(1, peerVolume * usePrefs.getState().outputVolume))
 }
 
 function closeLink(peerId: string): void {
@@ -148,8 +159,9 @@ function link(_roomId: string, peerId: string): RTCPeerConnection {
   pc.ontrack = (e) => {
     const stream = e.streams[0] ?? new MediaStream([e.track])
     audio.srcObject = stream
+    void routeTo(audio, usePrefs.getState().speakerDeviceId)
     const p = useVoice.getState().peers[peerId]
-    audio.volume = Math.min(1, p?.volume ?? 1)
+    audio.volume = playbackVolume(p?.volume ?? 1)
     audio.muted = p?.muted ?? false
     entry.meter?.()
     entry.meter = meter(stream, (speaking) =>
@@ -182,15 +194,15 @@ export const useVoice = create<VoiceState>((set, get) => ({
     if (get().roomId) get().leave()
     set({ joining: true })
     try {
-      mic = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-      })
+      pipe = await MicPipeline.open(usePrefs.getState())
+      mic = pipe.output
     } catch (e) {
       set({ joining: false })
       toast({ tone: 'error', title: translate(usePrefs.getState().language, 'voice.noMic'), body: String(e) }, 8000)
       return
     }
-    stopLocalMeter = meter(mic, (speaking) => set({ speaking }))
+    gateOpen = false
+    stopLocalMeter = localMeter(pipe)
     set({ roomId, joining: false, peers: {} })
     applyMicState()
     if (isTauri()) {
@@ -210,7 +222,8 @@ export const useVoice = create<VoiceState>((set, get) => ({
     for (const id of [...links.keys()]) closeLink(id)
     stopLocalMeter?.()
     stopLocalMeter = null
-    mic?.getTracks().forEach((t) => t.stop())
+    pipe?.close()
+    pipe = null
     mic = null
     unlistenPtt?.()
     unlistenPtt = null
@@ -225,7 +238,7 @@ export const useVoice = create<VoiceState>((set, get) => ({
 
   setPeerVolume: (peerId, volume) => {
     const a = links.get(peerId)?.audio
-    if (a) a.volume = Math.min(1, volume)
+    if (a) a.volume = playbackVolume(volume)
     set((s) => ({ peers: { ...s.peers, [peerId]: { ...(s.peers[peerId] ?? { speaking: false, muted: false }), volume } } }))
   },
 
@@ -277,3 +290,22 @@ export function applyVoicePrefs(): void {
   if (isTauri()) void invoke('ptt_set_key', { vk: p.voicePtt ? p.voicePttKey : 0 })
   applyMicState()
 }
+
+// Audio settings changed: apply them to a call in progress without leaving it.
+usePrefs.subscribe((p, prev) => {
+  if (!pipe) return
+  const micChanged =
+    p.micDeviceId !== prev.micDeviceId ||
+    p.micGain !== prev.micGain ||
+    p.echoCancel !== prev.echoCancel ||
+    p.noiseSuppress !== prev.noiseSuppress ||
+    p.autoGain !== prev.autoGain
+  if (micChanged) void pipe.apply(p).catch((e) => toast({ tone: 'error', title: translate(p.language, 'voice.noMic'), body: String(e) }, 8000))
+  if (p.speakerDeviceId !== prev.speakerDeviceId || p.outputVolume !== prev.outputVolume) {
+    for (const [id, l] of links) {
+      void routeTo(l.audio, p.speakerDeviceId)
+      l.audio.volume = playbackVolume(useVoice.getState().peers[id]?.volume ?? 1)
+    }
+  }
+  if (p.voiceActivation !== prev.voiceActivation) applyMicState()
+})

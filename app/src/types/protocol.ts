@@ -90,7 +90,7 @@ export function isUsable(state: PeerState): boolean {
   return state === 'active' || state === 'degraded' || state === 'network_ready'
 }
 
-export type LinkKind = 'direct' | 'relay' | 'unknown'
+export type LinkKind = 'direct' | 'relay' | 'hub' | 'unknown'
 
 export interface PeerSummary {
   /** The announced identity. Empty until the peer's hello arrives. */
@@ -503,6 +503,31 @@ export interface Settings {
   network?: NetworkSettings
   /** A free Metered.ca relay account; LanBaz fetches the relay servers itself. */
   metered?: { app: string; key: string } | null
+  /** This PC's relay for friends. */
+  friend_relay?: { enabled: boolean; port?: number; user?: string; pass?: string; cap_mbps?: number } | null
+  /** Extra Nostr relays for friends (a domestic one keeps friends working in an outage). */
+  nostr_relays?: string[] | null
+}
+
+/** net.outage_check */
+export interface OutageStatus {
+  mode: 'normal' | 'international' | 'offline'
+  foreign_ok: number
+  domestic_ok: number
+  at: string
+}
+
+/** relay.friend.status */
+export interface FriendRelayStatus {
+  enabled: boolean
+  running: boolean
+  public?: string
+  port: number
+  via?: string
+  code?: string
+  cap_mbps: number
+  relayed_mb: number
+  error?: string
 }
 
 /** A stable key for a peer row: the link id, else the announced id. */

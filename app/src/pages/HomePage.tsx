@@ -4,6 +4,7 @@ import { Activity, ChevronDown, DoorOpen, Gauge, Layers, Plus, Power, ShieldAler
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 
 import { GameFirewallBanner } from '../components/GameFirewallBanner'
+import { OutageBanner } from '../components/OutageBanner'
 import { Avatar, Banner, Card, CopyButton, EmptyState, PageHeader, PingBadge, SectionTitle, StateDot } from '../components/ui'
 import { useNumber, useT } from '../i18n'
 import { isTauri } from '../services/tauri'
@@ -44,6 +45,7 @@ export function HomePage() {
     <>
       <PageHeader title={t('home.title')} subtitle={t('home.subtitle')} />
       <GameFirewallBanner />
+      <OutageBanner />
 
       <SupervisionNotice />
       {elevated === false ? (
